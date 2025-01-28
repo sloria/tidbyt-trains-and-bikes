@@ -1,0 +1,74 @@
+[project]
+name = "app"
+description = "Updater app for my personal Tidbyt"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "gtfs-realtime-bindings>=1.0.0",
+    "httpx>=0.28.1",
+    "httpx>=0.28.1",
+    "litestar-saq>=0.4.0",
+    "litestar[standard,redis]>=2.14.0",
+    "protobuf>=5.29.3",
+    "python-dotenv>=1.0.1",
+    "starlette>=0.45.3",
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[dependency-groups]
+dev = ["app[cli]", "mypy>=1.14.1", "pre-commit>=4.1.0", "ruff>=0.9.3"]
+
+[project.scripts]
+tidbyt-updater = "app.lib.tidbyt_updater:cli"
+
+[project.optional-dependencies]
+cli = ["click>=8.1.8", "environs>=14.1.0"]
+
+[tool.ruff]
+fix = true
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+# use all checks available in ruff except the ones explicitly ignored below
+select = ["ALL"]
+ignore = [
+    "ANN",     # let mypy handle annotation checks
+    "ARG",     # unused arguments are common w/ interfaces
+    "COM",     # let formatter take care commas
+    "C901",    # don't enforce complexity level
+    "D",       # don't require docstrings
+    "DTZ007",  # ignore false positives due to https://github.com/astral-sh/ruff/issues/1306
+    "E501",    # leave line-length enforcement to formatter
+    "EM",      # allow string messages in exceptions
+    "ERA001",  # allow commenting out code
+    "FIX",     # allow "FIX" comments in code
+    "INP001",  # allow Python files outside of packages
+    "N806",    # allow uppercase variable names for variables that are classes
+    "PERF203", # allow try-except within loops
+    "PLR0913", # "Too many arguments"
+    "PLR0912", # "Too many branches"
+    "PLR2004", # "Magic value used in comparison"
+    "PTH",     # don't require using pathlib instead of os
+    "RUF012",  # allow mutable class variables
+    "S603",    # allow subprocess calls
+    "SIM102",  # Sometimes nested ifs are more readable than if...and...
+    "SIM105",  # "Use `contextlib.suppress(...)` instead of `try`-`except`-`pass`"
+    "SIM108",  # sometimes if-else is more readable than a ternary
+    "T201",    # allow print
+    "TD",      # allow TODO comments to be whatever we want
+    "TRY003",  # allow long messages passed to exceptions
+]
+
+[tool.mypy]
+files = ["src", "tests"]
+ignore_missing_imports = true
+warn_unreachable = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
