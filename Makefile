@@ -2,14 +2,10 @@ SHELL := /bin/bash
 INFO := $(shell printf "$(BLUE)ℹ$(NC)")
 OK := $(shell printf "$(GREEN)✓$(NC)")
 
-# OBJC_DISABLE_INITIALIZE_FORK_SAFETY needs to be set for macOS
-# For subprocess calls to work within forked processes:
-# https://stackoverflow.com/questions/50168647/multiprocessing-causes-python-to-crash-and-gives-an-error-may-have-been-in-progr
 .PHONY: serve
 serve:
 	@echo "${INFO} Starting the server... 🚀"
-	@export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES && \
-		litestar run --reload
+	@export litestar run --reload
 
 .PHONY: tidbyt-serve
 tidbyt-serve:
