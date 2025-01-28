@@ -11,6 +11,8 @@ from app.lib.periodic_task import PeriodicTask
 from . import settings
 from .lib.tidbyt import push_to_tidbyt, render_applet
 
+### Logging ###
+
 logging_config = LoggingConfig(
     root={"level": "INFO", "handlers": ["queue_listener"]},
     formatters={
@@ -22,7 +24,8 @@ logging_config = LoggingConfig(
 logger = logging_config.configure()()
 
 HERE = Path(__file__).parent.resolve()
-TIDBYT_APP_PATH = HERE / "app.star"
+
+### Routes ###
 
 
 @get("/transit")
@@ -38,6 +41,11 @@ async def transit() -> dict[str, Any]:
             "citibike": {"regular": 12, "ebike": 5},
         }
     }
+
+
+### Periodic tasks ###
+
+TIDBYT_APP_PATH = HERE / "app.star"
 
 
 async def render_and_push_to_tidbyt() -> None:
@@ -63,16 +71,20 @@ if settings.TIDBYT_ENABLE_PUSH:
     )
 
 
-async def on_startup(app: Litestar):
+async def start_periodic_tasks(app: Litestar):
     for task in periodic_tasks:
         task.start()
 
 
-async def on_shutdown(app: Litestar):
+async def stop_periodic_tasks(app: Litestar):
     for task in periodic_tasks:
         await task.stop()
 
 
+### The ASGI App ###
+
 app = Litestar(
-    route_handlers=[transit], on_startup=[on_startup], on_shutdown=[on_shutdown]
+    route_handlers=[transit],
+    on_startup=[start_periodic_tasks],
+    on_shutdown=[stop_periodic_tasks],
 )

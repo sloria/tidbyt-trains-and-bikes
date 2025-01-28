@@ -47,30 +47,3 @@ make stop-infra
   Get it by grepping through the `stops.txt` in the Regular GTFS file.
 
 TODO: document all the necessary envvars
-
-## Notes
-
-### MTA
-
-- Stop IDs: http://web.mta.info/developers/data/nyct/subway/google_transit.zip
-  - See stops.txt
-
-## Using the tidbyt-updater CLI
-
-Render and output base64-encoded image data:
-
-```
-tidbyt-updater render src/app/app.star
-```
-
-Render and serve an applet:
-
-```
-tidbyt-updater serve src/app/app.star
-```
-
-Render and push to device
-
-```
-tidbyt-updater push src/app/app.star
-```
