@@ -6,9 +6,8 @@ from typing import Any
 from litestar import Litestar, get
 from litestar.logging import LoggingConfig
 
-from app.lib.periodic_task import PeriodicTask
-
 from . import settings
+from .lib.periodic_task import PeriodicTask
 from .lib.tidbyt import push_to_tidbyt, render_applet
 
 ### Logging ###

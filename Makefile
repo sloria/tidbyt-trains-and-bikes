@@ -5,7 +5,7 @@ OK := $(shell printf "$(GREEN)✓$(NC)")
 .PHONY: serve
 serve:
 	@echo "${INFO} Starting the server... 🚀"
-	@export litestar run --reload
+	@litestar run --reload
 
 .PHONY: tidbyt-serve
 tidbyt-serve:

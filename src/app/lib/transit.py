@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+import datetime as dt
+import logging
+from dataclasses import dataclass
+
 import httpx
 from google.transit import gtfs_realtime_pb2
+
+logger = logging.getLogger(__name__)
 
 # https://api.mta.info/#/subwayRealTimeFeeds
 MTA_BASE_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
@@ -68,23 +74,54 @@ def _get_leave_time(
     return stop_time_update.arrival.time
 
 
-async def get_train_leave_times(route: str, station_id: str) -> list[int]:
-    """Fetch train arrival timestamps for a specific route at a station."""
+@dataclass
+class TrainLeaveTime:
+    route: str
+    time: int
+
+    @property
+    def wait_time_minutes(self) -> float:
+        now = dt.datetime.now(tz=dt.UTC).timestamp()
+        return max(0, (self.time - now) / 60)
+
+
+async def get_train_leave_times(
+    routes: set[str], station_id: str
+) -> list[TrainLeaveTime]:
+    """Fetch train arrival timestamps for specified routes at a station."""
+    # Get unique feed URLs for the given routes
+    feed_urls = {get_feed_url(route) for route in routes}
+    leave_times = []
+
     async with httpx.AsyncClient() as client:
-        response = await client.get(get_feed_url(route))
-        response.raise_for_status()
+        for feed_url in feed_urls:
+            response = await client.get(feed_url)
+            if not response.is_success:
+                logger.debug(
+                    "failed to fetch feed %s (status_code=%s). skipping...",
+                    feed_url,
+                    response.status_code,
+                )
+                continue
 
-        feed = gtfs_realtime_pb2.FeedMessage()
-        feed.ParseFromString(response.content)
+            feed = gtfs_realtime_pb2.FeedMessage()
+            feed.ParseFromString(response.content)
 
-        return sorted(
-            _get_leave_time(stop_time_update)
-            for entity in feed.entity
-            if entity.HasField("trip_update")
-            and entity.trip_update.trip.route_id == route
-            for stop_time_update in entity.trip_update.stop_time_update
-            if stop_time_update.stop_id == station_id
-        )
+            leave_times.extend(
+                [
+                    TrainLeaveTime(
+                        route=entity.trip_update.trip.route_id,
+                        time=_get_leave_time(stop_time_update),
+                    )
+                    for entity in feed.entity
+                    if entity.HasField("trip_update")
+                    and entity.trip_update.trip.route_id in routes
+                    for stop_time_update in entity.trip_update.stop_time_update
+                    if stop_time_update.stop_id == station_id
+                ]
+            )
+
+    return sorted(leave_times, key=lambda lt: lt.time)
 
 
 def format_time(minutes):
