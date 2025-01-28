@@ -12,6 +12,10 @@ TIDBYT_DEVICE_ID = os.environ["TIDBYT_DEVICE_ID"]
 TIDBYT_INSTALLATION_ID = os.getenv("TIDBYT_INSTALLATION_ID", "RageCageTransport")
 PIXLET_PATH = os.getenv("PIXLET_PATH", "pixlet")
 
+### Redis ###
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+
 
 ### MTA ###
 

@@ -106,11 +106,13 @@ async def transit() -> TransitData:
 ### Periodic tasks ###
 
 TIDBYT_APP_PATH = HERE / "app.star"
+# store = RedisStore.with_client(url=settings.REDIS_URL)
 store = MemoryStore()
 
 
 async def render_and_push_to_tidbyt() -> None:
-    previous_data = await store.get("image_data")
+    cached_data = await store.get("image_data")
+    previous_data = cached_data.decode("utf-8") if cached_data else None
     logger.info("rendering and pushing to TidByt")
     image_data = await render_applet(
         str(TIDBYT_APP_PATH), pixlet_binary=settings.PIXLET_PATH
@@ -124,7 +126,7 @@ async def render_and_push_to_tidbyt() -> None:
             installation_id=settings.TIDBYT_INSTALLATION_ID,
         )
     else:
-        logger.info("no changes detected, skipping push")
+        logger.info("cache hit: no image change, skipping push")
 
 
 periodic_tasks: list[PeriodicTask] = []
