@@ -6,7 +6,7 @@ def get_transit_data(base_url):
     response = http.get(base_url + "/transit")
     if response.status_code != 200:
         fail("Failed to fetch transit data")
-    return response.json()["data"]
+    return response.json()
 
 # Train line colors
 COLORS = {
@@ -16,7 +16,15 @@ COLORS = {
     "3": "#EE352E",
 }
 
-def render_train_line(line, time):
+def render_leave_times(leave_times):
+    next_leave_time = leave_times[0]
+    following_leave_time = leave_times[1]
+    return [
+        render_leave_time(next_leave_time),
+        render_leave_time(following_leave_time),
+    ]
+
+def render_leave_time(leave_time):
     return render.Box(
         width = 30,
         height = 8,
@@ -29,9 +37,9 @@ def render_train_line(line, time):
                         render.Box(
                             width = 8,
                             height = 8,
-                            color = COLORS[line],
+                            color = COLORS[leave_time["route"]],
                             child = render.Text(
-                                content = line,
+                                content = leave_time["route"],
                                 font = "tb-8",
                             ),
                         ),
@@ -41,7 +49,7 @@ def render_train_line(line, time):
                             child = render.Padding(
                                 pad = (2, 0, 0, 0),
                                 child = render.Text(
-                                    content = time,
+                                    content = str(int(leave_time["wait_time_minutes"])) + "m",
                                     font = "tb-8",
                                 ),
                             ),
@@ -52,22 +60,18 @@ def render_train_line(line, time):
         ),
     )
 
-def render_trains(train_times):
+def render_trains(trains):
+    station1 = trains[0]
+    station2 = trains[1]
     return render.Column(
         children = [
             render.Row(
-                children = [
-                    render_train_line("B", train_times["B"][0]),
-                    render_train_line("Q", train_times["Q"][0]),
-                ],
+                children = render_leave_times(station1["leave_times"]),
             ),
             render.Padding(
                 pad = (0, 2, 0, 0),
                 child = render.Row(
-                    children = [
-                        render_train_line("2", train_times["2"][0]),
-                        render_train_line("3", train_times["3"][0]),
-                    ],
+                    children = render_leave_times(station2["leave_times"]),
                 ),
             ),
         ],
@@ -103,7 +107,7 @@ def main(config):
             children = [
                 render.Padding(
                     pad = (2, 2, 2, 1),
-                    child = render_trains(data["mta"]),
+                    child = render_trains(data["trains"]),
                 ),
                 render.Padding(
                     pad = (2, 1, 2, 2),

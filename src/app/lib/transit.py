@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import httpx
 from google.transit import gtfs_realtime_pb2
@@ -78,11 +78,14 @@ def _get_leave_time(
 class TrainLeaveTime:
     route: str
     time: int
+    # Should probably be a property, but DTOs don't support properties yet
+    # https://github.com/litestar-org/litestar/issues/3979
+    wait_time_minutes: float | None = field(default=None)
 
-    @property
-    def wait_time_minutes(self) -> float:
-        now = dt.datetime.now(tz=dt.UTC).timestamp()
-        return max(0, (self.time - now) / 60)
+    def __post_init__(self):
+        if self.wait_time_minutes is None:
+            now = dt.datetime.now(tz=dt.UTC).timestamp()
+            self.wait_time_minutes = max(0, (self.time - now) / 60)
 
 
 async def get_train_leave_times(

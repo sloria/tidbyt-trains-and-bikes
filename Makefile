@@ -10,7 +10,7 @@ serve:
 .PHONY: tidbyt-serve
 tidbyt-serve:
 	@echo "${INFO} Starting the pixlet server... 🚀"
-	@uv run tidbyt-updater serve src/app/app.star
+	@pixlet serve src/app/app.star
 
 # Convenience commands for managing local infrastructure
 # From https://github.com/litestar-org/litestar-fullstack/blob/main/Makefile
