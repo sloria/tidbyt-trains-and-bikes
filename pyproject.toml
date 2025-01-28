@@ -20,7 +20,14 @@ requires = ["flit_core<4"]
 build-backend = "flit_core.buildapi"
 
 [dependency-groups]
-dev = ["app[cli]", "mypy>=1.14.1", "pre-commit>=4.1.0", "ruff>=0.9.3"]
+dev = [
+    "app[cli]",
+    "mypy>=1.14.1",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.25.2",
+    "ruff>=0.9.3",
+]
 
 [project.scripts]
 tidbyt-updater = "app.lib.tidbyt_updater:cli"
@@ -48,6 +55,7 @@ ignore = [
     "EM",      # allow string messages in exceptions
     "ERA001",  # allow commenting out code
     "FIX",     # allow "FIX" comments in code
+    "G004",    # allow f-strings in logging
     "INP001",  # allow Python files outside of packages
     "N806",    # allow uppercase variable names for variables that are classes
     "PERF203", # allow try-except within loops
@@ -63,6 +71,17 @@ ignore = [
     "T201",    # allow print
     "TD",      # allow TODO comments to be whatever we want
     "TRY003",  # allow long messages passed to exceptions
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "ARG",     # unused arguments are fine in tests
+    "PLR0915", # allow lots of statements
+    "PT007",   # ignore false positives due to https://github.com/astral-sh/ruff/issues/14743
+    "PT011",   # don't require match when using pytest.raises
+    "S",       # allow asserts
+    "SIM117",  # allow nested with statements because it's more readable sometimes
+    "SLF001",  # allow private attribute access
 ]
 
 [tool.mypy]

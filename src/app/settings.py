@@ -29,5 +29,5 @@ SAQ_USE_SERVER_LIFESPAN = bool(int(os.getenv("SAQ_USE_SERVER_LIFESPAN", "1")))
 
 # Whether to enable the TidByt push cron job.
 TIDBYT_ENABLE_PUSH = bool(int(os.getenv("TIDBYT_ENABLE_PUSH", "0")))
-# Schedule for the TidByt push cron job. Defaults to every 5 seconds.
-TIDBYT_PUSH_SCHEDULE = os.getenv("TIDBYT_PUSH_SCHEDULE", "* * * * * */5")
+# Interval for the TidByt push cron job. Defaults to every 5 seconds.
+TIDBYT_PUSH_INTERVAL = float(os.getenv("TIDBYT_PUSH_INTERVAL", "5"))

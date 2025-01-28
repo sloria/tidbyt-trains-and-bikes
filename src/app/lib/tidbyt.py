@@ -37,7 +37,7 @@ async def push_to_tidbyt(
         "Content-Type": "application/json",
     }
 
-    logger.info("pushing to tidbyt device %s", device_id)
+    logger.debug("pushing to tidbyt device %s", device_id)
     async with httpx.AsyncClient() as client:
         response = await client.post(
             f"https://api.tidbyt.com/v0/devices/{device_id}/push",
@@ -68,7 +68,7 @@ async def render_applet(
     If as_bytes is True, returns the raw bytes instead.
     """
     pixlet_binary = pixlet_binary or "pixlet"
-    logger.info("rendering applet %s", path)
+    logger.debug("rendering applet %s", path)
     process = await asyncio.create_subprocess_exec(
         pixlet_binary,
         "render",

@@ -1,19 +1,25 @@
 from __future__ import annotations
 
-import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from litestar import Litestar, get
-from litestar_saq import CronJob, QueueConfig, SAQConfig, SAQPlugin
+from litestar.logging import LoggingConfig
+
+from app.lib.periodic_task import PeriodicTask
 
 from . import settings
 from .lib.tidbyt import push_to_tidbyt, render_applet
 
-if TYPE_CHECKING:
-    from saq.types import Context
+logging_config = LoggingConfig(
+    root={"level": "INFO", "handlers": ["queue_listener"]},
+    formatters={
+        "standard": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
+    },
+    log_exceptions="always",
+)
 
-logger = logging.getLogger(__name__)
+logger = logging_config.configure()()
 
 HERE = Path(__file__).parent.resolve()
 TIDBYT_APP_PATH = HERE / "app.star"
@@ -34,7 +40,8 @@ async def transit() -> dict[str, Any]:
     }
 
 
-async def render_and_push_to_tidbyt(_: Context) -> None:
+async def render_and_push_to_tidbyt() -> None:
+    logger.info("rendering and pushing to TidByt")
     image_data = await render_applet(
         str(TIDBYT_APP_PATH), pixlet_binary=settings.PIXLET_PATH
     )
@@ -43,33 +50,29 @@ async def render_and_push_to_tidbyt(_: Context) -> None:
         api_key=settings.TIDBYT_API_KEY,
         device_id=settings.TIDBYT_DEVICE_ID,
         installation_id=settings.TIDBYT_INSTALLATION_ID,
-        background=True,
     )
 
 
-scheduled_tasks: list[CronJob] = []
+periodic_tasks: list[PeriodicTask] = []
 if settings.TIDBYT_ENABLE_PUSH:
-    scheduled_tasks.append(
-        CronJob(
+    periodic_tasks.append(
+        PeriodicTask(
             render_and_push_to_tidbyt,
-            cron=settings.TIDBYT_PUSH_SCHEDULE,
-            retries=0,
-            timeout=30,
+            interval=settings.TIDBYT_PUSH_INTERVAL,
         )
     )
 
-saq = SAQPlugin(
-    config=SAQConfig(
-        dsn=settings.REDIS_URL,
-        web_enabled=settings.SAQ_WEB_ENABLED,
-        worker_processes=settings.SAQ_PROCESSES,
-        use_server_lifespan=settings.SAQ_USE_SERVER_LIFESPAN,
-        queue_configs=[
-            QueueConfig(
-                concurrency=1,  # only allow one job at a time
-                scheduled_tasks=scheduled_tasks,
-            )
-        ],
-    )
+
+async def on_startup(app: Litestar):
+    for task in periodic_tasks:
+        task.start()
+
+
+async def on_shutdown(app: Litestar):
+    for task in periodic_tasks:
+        await task.stop()
+
+
+app = Litestar(
+    route_handlers=[transit], on_startup=[on_startup], on_shutdown=[on_shutdown]
 )
-app = Litestar(route_handlers=[transit], plugins=[saq])

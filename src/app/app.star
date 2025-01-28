@@ -88,7 +88,7 @@ def render_bikes(bike_data):
             render.Padding(
                 pad = (2, 0, 0, 0),
                 child = render.Text(
-                    content = str(bike_data["regular"]) + "R" + " | " + str(bike_data["ebike"]) + "E",
+                    content = str(int(bike_data["regular"])) + "R" + " | " + str(int(bike_data["ebike"])) + "E",
                     font = "tb-8",
                 ),
             ),
