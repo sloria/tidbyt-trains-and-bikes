@@ -1,18 +1,16 @@
+"""Litestar app that serves API endpoints for the Tidbyt apps"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 
 from litestar import Litestar, get
 from litestar.logging import LoggingConfig
-from litestar.stores.memory import MemoryStore
 
+from app import settings
 from app.lib.citibike import get_bike_counts
 from app.lib.mta import TrainLeaveTime, get_train_leave_times
-
-from . import settings
-from .lib.periodic_task import PeriodicTask
-from .lib.tidbyt import push_to_tidbyt, render_applet
+from app.tasks import periodic_tasks
 
 ### Logging ###
 
@@ -26,9 +24,7 @@ logging_config = LoggingConfig(
 
 logger = logging_config.configure()()
 
-HERE = Path(__file__).parent.resolve()
-
-### Routes ###
+### Data models ###
 
 
 @dataclass
@@ -47,7 +43,7 @@ class TrainStationData:
         leave_times = [
             leave_time
             for leave_time in await get_train_leave_times(routes, station_id=station_id)
-            if leave_time.wait_time_minutes >= 2
+            if leave_time.wait_time_minutes and leave_time.wait_time_minutes >= 2
         ]
         return cls(station_id=station_id, leave_times=leave_times)
 
@@ -74,6 +70,9 @@ class TransitData:
     citibike: BikeStationData
 
 
+### Mock data ###
+
+
 def get_mock_data():
     return TransitData(
         trains=[
@@ -96,7 +95,10 @@ def get_mock_data():
     )
 
 
-@get("/transit")
+### Route handlers ###
+
+
+@get("/transit", cache=5)  # keep response cached for 5 seconds
 async def transit() -> TransitData:
     if settings.USE_MOCKS:
         logger.debug("returning mock data")
@@ -115,40 +117,6 @@ async def transit() -> TransitData:
 
 
 ### Periodic tasks ###
-
-TIDBYT_APP_PATH = HERE / "app.star"
-# store = RedisStore.with_client(url=settings.REDIS_URL)
-store = MemoryStore()
-
-
-async def render_and_push_to_tidbyt() -> None:
-    cached_data = await store.get("image_data")
-    previous_data = cached_data.decode("utf-8") if cached_data else None
-    logger.info("rendering and pushing to TidByt")
-    image_data = await render_applet(
-        str(TIDBYT_APP_PATH), pixlet_binary=settings.PIXLET_PATH
-    )
-    if image_data != previous_data:
-        await store.set("image_data", image_data)
-        await push_to_tidbyt(
-            image_data=image_data,
-            api_key=settings.TIDBYT_API_KEY,
-            device_id=settings.TIDBYT_DEVICE_ID,
-            installation_id=settings.TIDBYT_INSTALLATION_ID,
-            background=True,
-        )
-    else:
-        logger.info("cache hit: no image change, skipping push")
-
-
-periodic_tasks: list[PeriodicTask] = []
-if settings.TIDBYT_ENABLE_PUSH:
-    periodic_tasks.append(
-        PeriodicTask(
-            render_and_push_to_tidbyt,
-            interval=settings.TIDBYT_PUSH_INTERVAL,
-        )
-    )
 
 
 async def start_periodic_tasks(app: Litestar):

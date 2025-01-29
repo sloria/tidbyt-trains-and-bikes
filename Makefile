@@ -14,4 +14,4 @@ serve-api:
 .PHONY: serve-tidbyt
 serve-tidbyt:
 	@echo "Starting the pixlet server... 🚀"
-	@pixlet serve src/app/app.star
+	@pixlet serve src/app/tidbyt_apps/rctransit.star
