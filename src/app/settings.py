@@ -25,6 +25,10 @@ MTA_STATION_ROUTES1 = set(os.environ["MTA_STATION_ROUTES1"].split(","))
 MTA_STATION_ID2 = os.environ["MTA_STATION_ID2"]
 MTA_STATION_ROUTES2 = set(os.environ["MTA_STATION_ROUTES2"].split(","))
 
+### Citibike ###
+
+CITIBIKE_STATION_ID = os.environ["CITIBIKE_STATION_ID"]
+
 ### Periodic tasks ###
 
 # Whether to enable the TidByt push cron job.

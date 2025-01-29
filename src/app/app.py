@@ -7,7 +7,8 @@ from litestar import Litestar, get
 from litestar.logging import LoggingConfig
 from litestar.stores.memory import MemoryStore
 
-from app.lib.transit import TrainLeaveTime, get_train_leave_times
+from app.lib.citibike import get_bike_counts
+from app.lib.mta import TrainLeaveTime, get_train_leave_times
 
 from . import settings
 from .lib.periodic_task import PeriodicTask
@@ -31,12 +32,14 @@ HERE = Path(__file__).parent.resolve()
 
 
 @dataclass
-class StationData:
+class TrainStationData:
     station_id: str
     leave_times: list[TrainLeaveTime]
 
     @classmethod
-    async def from_station_id(cls, station_id: str, *, routes: set[str]) -> StationData:
+    async def from_station_id(
+        cls, station_id: str, *, routes: set[str]
+    ) -> TrainStationData:
         """Initialize StationData with leave times for specified routes.
         Fetches data from the MTA GTFS feed.
         """
@@ -50,28 +53,38 @@ class StationData:
 
 
 @dataclass
-class CitibikeData:
+class BikeStationData:
     regular: int
     ebike: int
+
+    @classmethod
+    async def from_station_id(cls, station_id: str) -> BikeStationData:
+        station_data = await get_bike_counts(station_id)
+        if station_data is None:
+            return BikeStationData(regular=0, ebike=0)
+        return cls(
+            regular=station_data.regular,
+            ebike=station_data.ebikes,
+        )
 
 
 @dataclass
 class TransitData:
-    trains: list[StationData]
-    citibike: CitibikeData
+    trains: list[TrainStationData]
+    citibike: BikeStationData
 
 
 def get_mock_data():
     return TransitData(
         trains=[
-            StationData(
+            TrainStationData(
                 station_id="A01",
                 leave_times=[
                     TrainLeaveTime(route="B", time=1633063200, wait_time_minutes=2),
                     TrainLeaveTime(route="Q", time=1633063200, wait_time_minutes=19),
                 ],
             ),
-            StationData(
+            TrainStationData(
                 station_id="A02",
                 leave_times=[
                     TrainLeaveTime(route="2", time=1633063200, wait_time_minutes=1),
@@ -79,8 +92,7 @@ def get_mock_data():
                 ],
             ),
         ],
-        # TODO: Get actual data
-        citibike=CitibikeData(regular=12, ebike=5),
+        citibike=BikeStationData(regular=12, ebike=5),
     )
 
 
@@ -91,15 +103,14 @@ async def transit() -> TransitData:
         return get_mock_data()
     return TransitData(
         trains=[
-            await StationData.from_station_id(
+            await TrainStationData.from_station_id(
                 settings.MTA_STATION_ID1, routes=settings.MTA_STATION_ROUTES1
             ),
-            await StationData.from_station_id(
+            await TrainStationData.from_station_id(
                 settings.MTA_STATION_ID2, routes=settings.MTA_STATION_ROUTES2
             ),
         ],
-        # TODO: Get actual data
-        citibike=CitibikeData(regular=12, ebike=5),
+        citibike=await BikeStationData.from_station_id(settings.CITIBIKE_STATION_ID),
     )
 
 
@@ -124,6 +135,7 @@ async def render_and_push_to_tidbyt() -> None:
             api_key=settings.TIDBYT_API_KEY,
             device_id=settings.TIDBYT_DEVICE_ID,
             installation_id=settings.TIDBYT_INSTALLATION_ID,
+            background=True,
         )
     else:
         logger.info("cache hit: no image change, skipping push")
