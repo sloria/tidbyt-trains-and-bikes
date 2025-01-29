@@ -35,9 +35,4 @@ make serve-tidbyt
 
 ## Configuration
 
-- `TIDBYT_API_KEY` (required): TidByt API key. Get it from the app.
-- `TIDBYT_DEVICE_ID` (required): TidByt device ID. Get it from the app.
-- `MTA_STOP_ID` (required): Stop ID for your station.
-  Get it by grepping through the `stops.txt` in the Regular GTFS file.
-
-TODO: document all the necessary envvars
+For local development, modify `.env` with proper values. Variables with the `CHANGEME` placeholder are required.
