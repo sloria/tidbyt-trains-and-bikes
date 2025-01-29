@@ -38,6 +38,7 @@ ROUTE_COLORS = {
 DELAY_COLOR = "#FFA500"
 
 def render_leave_times(leave_times):
+    # TODO: Handle cases where there are < 2 leave times
     next_leave_time = leave_times[0]
     following_leave_time = leave_times[1]
     return [
@@ -46,42 +47,30 @@ def render_leave_times(leave_times):
     ]
 
 def render_leave_time(leave_time):
-    return render.Box(
-        width = 30,
-        height = 8,
-        child = render.Row(
-            expanded = True,
-            main_align = "space_between",
-            children = [
-                render.Row(
-                    children = [
-                        # Train logo
-                        render.Circle(
-                            diameter = 8,
-                            color = ROUTE_COLORS[leave_time["route"]],
-                            child = render.Text(
-                                color = "#1C1C1C" if leave_time["route"] in ["N", "Q", "R", "W"] else "#FFF",
-                                content = leave_time["route"],
-                                font = "tb-8",
-                            ),
-                        ),
-                        # Wait time
-                        render.Box(
-                            width = 22,
-                            height = 8,
-                            child = render.Padding(
-                                pad = (2, 0, 0, 0),
-                                child = render.Text(
-                                    color = DELAY_COLOR if leave_time["has_delays"] else "#FFF",
-                                    content = str(int(leave_time["wait_time_minutes"])) + "m",
-                                    font = "tb-8",
-                                ),
-                            ),
-                        ),
-                    ],
+    return render.Row(
+        main_align = "start",
+        children = [
+            # Train logo
+            render.Circle(
+                diameter = 8,
+                color = ROUTE_COLORS[leave_time["route"]],
+                child = render.Text(
+                    color = "#1C1C1C" if leave_time["route"] in ["N", "Q", "R", "W"] else "#FFF",
+                    content = leave_time["route"],
+                    font = "tb-8",
                 ),
-            ],
-        ),
+            ),
+            # Wait time
+            render.Box(
+                width = 22,
+                height = 8,
+                child = render.Text(
+                    color = DELAY_COLOR if leave_time["has_delays"] else "#FFF",
+                    content = str(int(leave_time["wait_time_minutes"])) + "m",
+                    font = "tb-8",
+                ),
+            ),
+        ],
     )
 
 def render_trains(trains):
@@ -90,6 +79,7 @@ def render_trains(trains):
     return render.Column(
         children = [
             render.Row(
+                main_align = "start",
                 children = render_leave_times(station1["leave_times"]),
             ),
             render.Padding(
