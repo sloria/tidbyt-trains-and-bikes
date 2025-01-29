@@ -78,41 +78,17 @@ class TransitData:
     citibike: BikeStationData
 
 
-def get_mock_data():
-    return TransitData(
-        trains=[
-            TrainStationData(
-                station_id="A01",
-                departures=[
-                    TrainDeparture(
-                        route="B",
-                        time=1633063200,
-                        wait_time_minutes=19,
-                        has_delays=True,
-                    ),
-                    TrainDeparture(route="Q", time=1633063200, wait_time_minutes=2),
-                ],
-            ),
-            TrainStationData(
-                station_id="A02",
-                departures=[
-                    TrainDeparture(route="2", time=1633063200, wait_time_minutes=1),
-                    TrainDeparture(route="3", time=1633063200, wait_time_minutes=5),
-                ],
-            ),
-        ],
-        citibike=BikeStationData(regular=0, ebike=0),
-    )
-
-
 ### Route handlers ###
 
 
 @get("/transit", cache=5)  # keep response cached for 5 seconds
-async def transit(*, mock: bool = False) -> TransitData:
-    if mock:
+async def transit(*, mock: str | None = None) -> TransitData:
+    mock_name = mock or settings.MOCK
+    if mock_name:
+        from app.api.mocks import TransitDataMock
+
         logger.debug("returning mock data")
-        return get_mock_data()
+        return TransitDataMock[mock_name].value
     return TransitData(
         trains=[
             await TrainStationData.from_station_id(

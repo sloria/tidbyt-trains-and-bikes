@@ -1,4 +1,6 @@
-# personal tidbyt stuff
+# tidbyt-updater
+
+Renders my private tidbyt apps. **Not written for use outside of my apartment**.
 
 ## Dev setup
 

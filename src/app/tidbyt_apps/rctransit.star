@@ -4,6 +4,9 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
+# NOTE: Must be a top-level constant so that this can be replaced within tests
+API_URL = "http://localhost:8000"
+
 # Icons
 IMAGE_BIKE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAAoElEQVQYV42QOw4CMQxExzEiDZyHC1AtAtFxnD3PNnwKuBkNKDF2gqNsgUSkKHLs5/GYAIjevw/1gEhliexbO3VxCAE5Z8wAL2LmmgwLyOEGXHdoAHOUtD/PR9KCco73qnQZmjKprDy3G6zWY4OWjxNew1Rjgw3U10YsgM/sHZ20ziX3E/gataKg86f0bgtwf8W0b8M3pAtR01Wnz8UY8QEh21AK+PPRqwAAAABJRU5ErkJggg==")
 IMAGE_LIGHTNING = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAFCAYAAABirU3bAAAAKUlEQVQIW2NkAIL//xn+g2gQYEThMDIwMsJkYBJgATgHpgIkAFQLlgQAncQPANJcSxAAAAAASUVORK5CYII=")
@@ -88,28 +91,49 @@ def main(config):
     )
 
 def get_schema():
+    mock_options = [
+        schema.Option(
+            display = "None - Use Real Data",
+            value = " ",
+        ),
+        schema.Option(
+            display = "Basic",
+            value = "basic",
+        ),
+        schema.Option(
+            display = "Long Wait Times",
+            value = "long_wait_times",
+        ),
+        schema.Option(
+            display = "No Bikes",
+            value = "no_bikes",
+        ),
+    ]
     return schema.Schema(
         version = "1",
         fields = [
             schema.Text(
                 id = "api_url",
                 name = "API URL",
-                desc = "The base API URL for the tidbyt-updater API.",
+                desc = "The base API URL.",
                 icon = "gear",
+                default = API_URL,
             ),
-            schema.Toggle(
-                id = "mock",
-                name = "Use mock data",
-                desc = "Whether to use mock data instead of fetching from MTA and Citibike APIs.",
-                icon = "gear",
-                default = False,
+            schema.Dropdown(
+                id = "mock_name",
+                name = "Mock Data",
+                desc = "Mock data source to use for debugging.",
+                icon = "bug",
+                default = mock_options[0].value,
+                options = mock_options,
             ),
         ],
     )
 
 def get_transit_data(config):
-    base_url = config.str("api_url", "http://localhost:8000")
-    route = "/transit?mock=1" if config.bool("mock", False) else "/transit"
+    base_url = config.str("api_url", API_URL)
+    mock_name = config.str("mock_name", "").strip()
+    route = "/transit?mock={}".format(mock_name) if mock_name else "/transit"
     response = http.get(base_url + route)
     if response.status_code != 200:
         fail("Failed to fetch transit data")

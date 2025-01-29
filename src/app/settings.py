@@ -29,3 +29,8 @@ CITIBIKE_STATION_ID = os.environ["CITIBIKE_STATION_ID"]
 TIDBYT_ENABLE_PUSH = bool(int(os.getenv("TIDBYT_ENABLE_PUSH", "0")))
 # Push interval in seconds
 TIDBYT_PUSH_INTERVAL = float(os.getenv("TIDBYT_PUSH_INTERVAL", "10"))
+
+### API ###
+
+# Enable
+MOCK = os.getenv("MOCK", None)

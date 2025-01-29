@@ -1,6 +1,9 @@
 import asyncio  # Added import
 import base64
 import logging
+import re
+import tempfile
+from pathlib import Path
 from typing import Literal, overload
 
 import httpx
@@ -88,3 +91,26 @@ async def render_applet(
     if as_bytes:
         return output_bytes
     return base64.b64encode(output_bytes).decode("utf-8")
+
+
+async def render_applet_with_replacements(
+    path: str, *, replacements: dict[str, str], **kwargs
+) -> bytes | str:
+    """Render a Pixlet applet with replaced constants. This is necessary for
+    e.g., replacing server URLs within applets because applets can't read
+    environment variables.
+    """
+    content = Path(path).read_text()
+
+    # Replace constants
+    modified_content = content
+    for key, value in replacements.items():
+        pattern = rf'{key}\s*=\s*["\'].*?["\']'
+        replacement = f'{key} = "{value}"'
+        modified_content = re.sub(pattern, replacement, modified_content)
+
+    # Create temporary file with modified content
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".star") as tmp_file:
+        tmp_file.write(modified_content)
+        tmp_file.flush()
+        return await render_applet(tmp_file.name, **kwargs)
