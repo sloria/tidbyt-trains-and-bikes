@@ -7,7 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "gtfs-realtime-bindings>=1.0.0",
     "httpx>=0.28.1",
-    "litestar[standard,redis]>=2.14.0",
+    "litestar[standard]>=2.14.0",
     "python-dotenv>=1.0.1",
 ]
 
