@@ -68,7 +68,7 @@ def get_mock_data():
                 station_id="A01",
                 leave_times=[
                     TrainLeaveTime(route="B", time=1633063200, wait_time_minutes=2),
-                    TrainLeaveTime(route="Q", time=1633063200, wait_time_minutes=5),
+                    TrainLeaveTime(route="Q", time=1633063200, wait_time_minutes=19),
                 ],
             ),
             StationData(

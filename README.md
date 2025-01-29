@@ -15,28 +15,22 @@ Copy env file and set environment variables:
 cp .env.local.example .env
 ```
 
-Start auxiliary services:
-
-```
-make start-infra
-```
-
-Run the API server:
+Run both the API server and the Tidbyt server simultaneously (requires GNU parallel, which can be installed on macOS `brew install parallel`):
 
 ```
 make serve
 ```
 
-Run the tidbyt server:
+Navigate to http://127.0.0.1:8080/ to view the TidByt preview app.
+
+Or run the servers individually:
 
 ```
-make tidbyt-serve
+make serve-api
 ```
 
-To stop auxiliary services:
-
 ```
-make stop-infra
+make serve-tidbyt
 ```
 
 ## Configuration

@@ -3,12 +3,7 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
-def get_transit_data(base_url):
-    response = http.get(base_url + "/transit")
-    if response.status_code != 200:
-        fail("Failed to fetch transit data")
-    return response.json()
-
+IMAGE_BIKE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAAu0lEQVQYV2NkIBEwIqv/DwQgPiMQACkmIPcvjC8nJyf46NGj9ygaxMXFuV+8ePEFqIgZqOefcdoZ1rOhxr8YXBkZgZqZQGKM6up+UjenbHyK4jKgAjB/N8TG/y4QWZDNIJ3/v7qYM/BUnITrCZ21Wnh1WuhbsABIM0gjxJb/EALiZriJMJ0gk8FyODWArIcaEBq6im3VqtCfcMNgckCaFajmF8xUCQkJnhcvXn4HmvsP7H5oyIHY3t7ekgAwNF/zxdOZegAAAABJRU5ErkJggg==")
 IMAGE_LIGHTNING = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAp/s
 AAKf7ATxDYQ0AAAMySURBVFhHtZZPSFRRFMbPueMfjApcRH8giAiCqNSZ/mlWFGKBFZqaWBS1aRFtgmiXJW6kldCmRdEqcHTIEa
@@ -24,6 +19,12 @@ MCkqCuHMc0RkVS7dXcxnUDOhLaicAOmDINBm5IZq09qnHyo5E84SUBTP7f1eNysYf9GsvaJnVy6ruRPe
 KRcwLD1GKlg8iaAZdq73mVKe+UzEFr8MLfJ38CdrftZGPufXPkn/Fjt45ZYNPnSB/LPgCQ6kw+RabYS1fi3azyp+4RjA8n4icqw
 8mGkUMvtL96n3vgF0W/iaRpXqhpMFQAAAABJRU5ErkJggg==
 """)
+
+def get_transit_data(base_url):
+    response = http.get(base_url + "/transit")
+    if response.status_code != 200:
+        fail("Failed to fetch transit data")
+    return response.json()
 
 # Train line colors
 COLORS = {
@@ -98,24 +99,16 @@ def render_trains(trains):
 def render_bikes(bike_data):
     return render.Row(
         children = [
-            render.Box(
-                width = 18,
-                height = 8,
-                color = "#00A0DC",
-                child = render.Text(
-                    content = "citi",
-                    font = "tb-8",
-                ),
-            ),
+            render.Image(IMAGE_BIKE),
             render.Padding(
-                pad = (2, 0, 0, 0),
+                pad = (2, 1, 0, 0),
                 child = render.Row(
                     children = [
                         render.Text(
                             content = str(int(bike_data["regular"])),
                             font = "tb-8",
                         ),
-                        render.Image(src = IMAGE_LIGHTNING, width = 8, height = 8),
+                        render.Image(src = IMAGE_LIGHTNING, height = 7),
                         render.Text(
                             content = str(int(bike_data["ebike"])),
                             font = "tb-8",
