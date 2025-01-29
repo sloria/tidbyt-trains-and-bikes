@@ -60,6 +60,7 @@ def render_leave_time(leave_time):
                             diameter = 8,
                             color = ROUTE_COLORS[leave_time["route"]],
                             child = render.Text(
+                                color = "#1C1C1C" if leave_time["route"] in ["N", "Q", "R", "W"] else "#FFF",
                                 content = leave_time["route"],
                                 font = "tb-8",
                             ),
