@@ -26,10 +26,5 @@ CITIBIKE_STATION_ID = os.environ["CITIBIKE_STATION_ID"]
 
 ### Periodic tasks ###
 
-# Whether to enable the TidByt push cron job.
 TIDBYT_ENABLE_PUSH = bool(int(os.getenv("TIDBYT_ENABLE_PUSH", "0")))
-# Interval for the TidByt push cron job. Defaults to every 5 seconds.
 TIDBYT_PUSH_INTERVAL = float(os.getenv("TIDBYT_PUSH_INTERVAL", "5"))
-
-# Whether to use mock data for the transit endpoint
-USE_MOCKS = bool(int(os.getenv("USE_MOCKS", "0")))

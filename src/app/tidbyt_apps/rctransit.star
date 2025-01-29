@@ -20,19 +20,22 @@ KRcwLD1GKlg8iaAZdq73mVKe+UzEFr8MLfJ38CdrftZGPufXPkn/Fjt45ZYNPnSB/LPgCQ6kw+RabYS1
 8mGkUMvtL96n3vgF0W/iaRpXqhpMFQAAAABJRU5ErkJggg==
 """)
 
-def get_transit_data(base_url):
-    response = http.get(base_url + "/transit")
+def get_transit_data(config):
+    base_url = config.str("api_url", "http://localhost:8000")
+    route = "/transit?mock=1" if config.bool("mock", False) else "/transit"
+    response = http.get(base_url + route)
     if response.status_code != 200:
         fail("Failed to fetch transit data")
     return response.json()
 
 # Train line colors
-COLORS = {
+ROUTE_COLORS = {
     "B": "#FF6319",
     "Q": "#FCCC0A",
     "2": "#EE352E",
     "3": "#EE352E",
 }
+DELAY_COLOR = "#FFA500"
 
 def render_leave_times(leave_times):
     next_leave_time = leave_times[0]
@@ -55,7 +58,7 @@ def render_leave_time(leave_time):
                         # Train logo
                         render.Circle(
                             diameter = 8,
-                            color = COLORS[leave_time["route"]],
+                            color = ROUTE_COLORS[leave_time["route"]],
                             child = render.Text(
                                 content = leave_time["route"],
                                 font = "tb-8",
@@ -68,6 +71,7 @@ def render_leave_time(leave_time):
                             child = render.Padding(
                                 pad = (2, 0, 0, 0),
                                 child = render.Text(
+                                    color = DELAY_COLOR if leave_time["has_delays"] else "#FFF",
                                     content = str(int(leave_time["wait_time_minutes"])) + "m",
                                     font = "tb-8",
                                 ),
@@ -120,8 +124,7 @@ def render_bikes(bike_data):
     )
 
 def main(config):
-    base_url = config.str("api_url", "http://localhost:8000")
-    data = get_transit_data(base_url = base_url)
+    data = get_transit_data(config)
     return render.Root(
         child = render.Column(
             children = [
@@ -144,8 +147,15 @@ def get_schema():
             schema.Text(
                 id = "api_url",
                 name = "API URL",
-                desc = "The base API URL for the tidbyt-updater API",
+                desc = "The base API URL for the tidbyt-updater API.",
                 icon = "gear",
+            ),
+            schema.Toggle(
+                id = "mock",
+                name = "Use mock data",
+                desc = "Whether to use mock data instead of fetching from MTA and Citibike APIs.",
+                icon = "gear",
+                default = False,
             ),
         ],
     )

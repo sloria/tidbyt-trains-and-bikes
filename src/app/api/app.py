@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from litestar import Litestar, get
 from litestar.logging import LoggingConfig
 
 from app import settings
 from app.lib.citibike import get_bike_counts
-from app.lib.mta import TrainLeaveTime, get_train_leave_times
+from app.lib.mta import ServiceAlert, TrainLeaveTime, get_station_data
 from app.tasks import periodic_tasks
 
 ### Logging ###
@@ -30,22 +30,27 @@ logger = logging_config.configure()()
 @dataclass
 class TrainStationData:
     station_id: str
-    leave_times: list[TrainLeaveTime]
+    alerts: list[ServiceAlert] = field(default_factory=list)
+    leave_times: list[TrainLeaveTime] = field(default_factory=list)
 
     @classmethod
     async def from_station_id(
         cls, station_id: str, *, routes: set[str]
     ) -> TrainStationData:
-        """Initialize StationData with leave times for specified routes.
+        """Initialize TrainStationData with leave times for specified routes.
         Fetches data from the MTA GTFS feed.
         """
-        # Only return leave times for trains we can actually catch
-        leave_times = [
-            leave_time
-            for leave_time in await get_train_leave_times(routes, station_id=station_id)
-            if leave_time.wait_time_minutes and leave_time.wait_time_minutes >= 2
-        ]
-        return cls(station_id=station_id, leave_times=leave_times)
+        station_data = await get_station_data(routes, station_id)
+        return cls(
+            station_id=station_id,
+            alerts=station_data.alerts,
+            leave_times=[
+                # Only return leave times for trains we can actually catch
+                leave_time
+                for leave_time in station_data.leave_times
+                if leave_time.wait_time_minutes and leave_time.wait_time_minutes >= 2
+            ],
+        )
 
 
 @dataclass
@@ -70,16 +75,15 @@ class TransitData:
     citibike: BikeStationData
 
 
-### Mock data ###
-
-
 def get_mock_data():
     return TransitData(
         trains=[
             TrainStationData(
                 station_id="A01",
                 leave_times=[
-                    TrainLeaveTime(route="B", time=1633063200, wait_time_minutes=2),
+                    TrainLeaveTime(
+                        route="B", time=1633063200, wait_time_minutes=2, has_delays=True
+                    ),
                     TrainLeaveTime(route="Q", time=1633063200, wait_time_minutes=19),
                 ],
             ),
@@ -99,8 +103,8 @@ def get_mock_data():
 
 
 @get("/transit", cache=5)  # keep response cached for 5 seconds
-async def transit() -> TransitData:
-    if settings.USE_MOCKS:
+async def transit(*, mock: bool = False) -> TransitData:
+    if mock:
         logger.debug("returning mock data")
         return get_mock_data()
     return TransitData(
