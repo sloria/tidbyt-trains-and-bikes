@@ -102,7 +102,7 @@ def get_mock_data():
                 ],
             ),
         ],
-        citibike=BikeStationData(regular=12, ebike=5),
+        citibike=BikeStationData(regular=0, ebike=0),
     )
 
 

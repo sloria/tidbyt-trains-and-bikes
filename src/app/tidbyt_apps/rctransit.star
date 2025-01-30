@@ -4,16 +4,13 @@ load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 
-IMAGE_BIKE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAAu0lEQVQYV2NkIBEwIqv/DwQgPiMQACkmIPcvjC8nJyf46NGj9ygaxMXFuV+8ePEFqIgZqOefcdoZ1rOhxr8YXBkZgZqZQGKM6up+UjenbHyK4jKgAjB/N8TG/y4QWZDNIJ3/v7qYM/BUnITrCZ21Wnh1WuhbsABIM0gjxJb/EALiZriJMJ0gk8FyODWArIcaEBq6im3VqtCfcMNgckCaFajmF8xUCQkJnhcvXn4HmvsP7H5oyIHY3t7ekgAwNF/zxdOZegAAAABJRU5ErkJggg==")
+# Icons
+IMAGE_BIKE = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAAoElEQVQYV42QOw4CMQxExzEiDZyHC1AtAtFxnD3PNnwKuBkNKDF2gqNsgUSkKHLs5/GYAIjevw/1gEhliexbO3VxCAE5Z8wAL2LmmgwLyOEGXHdoAHOUtD/PR9KCco73qnQZmjKprDy3G6zWY4OWjxNew1Rjgw3U10YsgM/sHZ20ziX3E/gataKg86f0bgtwf8W0b8M3pAtR01Wnz8UY8QEh21AK+PPRqwAAAABJRU5ErkJggg==")
 IMAGE_LIGHTNING = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAFCAYAAABirU3bAAAAKUlEQVQIW2NkAIL//xn+g2gQYEThMDIwMsJkYBJgATgHpgIkAFQLlgQAncQPANJcSxAAAAAASUVORK5CYII=")
 
-def get_transit_data(config):
-    base_url = config.str("api_url", "http://localhost:8000")
-    route = "/transit?mock=1" if config.bool("mock", False) else "/transit"
-    response = http.get(base_url + route)
-    if response.status_code != 200:
-        fail("Failed to fetch transit data")
-    return response.json()
+# Tidbyt dimensions
+WIDTH = 64
+HEIGHT = 32
 
 COLORS = {
     "white": "#FFF",
@@ -101,6 +98,14 @@ def get_schema():
         ],
     )
 
+def get_transit_data(config):
+    base_url = config.str("api_url", "http://localhost:8000")
+    route = "/transit?mock=1" if config.bool("mock", False) else "/transit"
+    response = http.get(base_url + route)
+    if response.status_code != 200:
+        fail("Failed to fetch transit data")
+    return response.json()
+
 def LeaveTime(leave_time):
     return render.Row(
         cross_align = "center",
@@ -131,9 +136,25 @@ def BikeData(bike_data):
     regular_bike_count = int(bike_data["regular"])
     ebike_count = int(bike_data["ebike"])
 
+    # Number of total characters for the counts
+    n_bike_digits = len(str(regular_bike_count)) + len(str(ebike_count))
+
+    # Digits in tb-8 font are monospaced 5x8
+    digits_width = n_bike_digits * 5
+    icon_width = 5
+
+    # Padding to the right of the counts
+    counts_right_padding = 2
+
+    # Total pixels that the counts take up
+    counts_text_width = digits_width + icon_width + counts_right_padding
+
     # Bike animation
     bike_start_x = -10  # start off screen
-    bike_end_x = 22  # end next to counts
+
+    # Increase to increase space between bike and counts
+    offset = 14
+    bike_end_x = WIDTH - counts_text_width - offset  # end next to counts
     animated_bike = animation.Transformation(
         child = render.Image(IMAGE_BIKE),
         duration = 125,
@@ -147,7 +168,7 @@ def BikeData(bike_data):
                 transforms = [animation.Translate(15, 0)],
             ),
             animation.Keyframe(
-                percentage = 0.30,
+                percentage = 0.35,
                 transforms = [animation.Translate(bike_end_x, 0)],
                 curve = "ease_out",
             ),
@@ -157,16 +178,20 @@ def BikeData(bike_data):
             ),
         ],
     )
+    animation_width = WIDTH - counts_text_width
     return render.Row(
         expanded = True,
         main_align = "end",
         children = [
+            # Rectangle along which the bike moves
             render.Box(
-                width = 40,
+                # color = COLORS["orange"],
+                width = animation_width,
                 child = animated_bike,
             ),
             render.Padding(
-                pad = (0, 1, 3, 0),
+                # Align counts text with the bottom of the bike
+                pad = (0, 1, counts_right_padding, 0),
                 child = render.Row(
                     children = [
                         # Regular bike count
