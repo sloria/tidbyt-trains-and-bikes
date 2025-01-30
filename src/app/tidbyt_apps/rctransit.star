@@ -31,6 +31,7 @@ def get_transit_data(config):
 COLORS = {
     "white": "#FFF",
     "dark_gray": "#1C1C1C",
+    "gray": "#AFAFAF",
     "orange": "#FFA500",
 }
 
@@ -42,20 +43,77 @@ ROUTE_COLORS = {
     "3": "#EE352E",
 }
 
-def render_leave_times(leave_times):
-    return render.Row(
-        expanded = True,
-        children = [
-            render_leave_time(leave_times[0]),
-            render.Padding(
-                pad = (4, 0, 0, 0),
-                child = render_leave_time(leave_times[1]),
-            ) if len(leave_times) > 1 else None,
+def main(config):
+    data = get_transit_data(config)
+    station1, station2 = data["trains"]
+    return render.Root(
+        max_age = 10,
+        child = render.Padding(
+            # 1px of padding around all content
+            pad = (1, 1, 1, 0),
+            child = render.Column(
+                expanded = True,
+                main_align = "space_between",
+                children = [
+                    render.Row(
+                        expanded = True,
+                        children = [
+                            render.Column(
+                                children = [
+                                    # Station 1, first arrival
+                                    LeaveTime(station1["leave_times"][0]),
+                                    # Station 2, first arrival
+                                    render.Padding(
+                                        pad = (0, 1, 0, 0),
+                                        child = LeaveTime(station2["leave_times"][0]),
+                                    ),
+                                ],
+                            ),
+                            render.Padding(
+                                pad = (3, 0, 0, 0),
+                                child = render.Column(
+                                    children = [
+                                        # Station 1, second arrival
+                                        LeaveTime(station1["leave_times"][1]),
+                                        # Station 2, second arrival
+                                        render.Padding(
+                                            pad = (0, 1, 0, 0),
+                                            child = LeaveTime(station2["leave_times"][1]),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ],
+                    ),
+                    BikeData(data["citibike"]),
+                ],
+            ),
+        ),
+    )
+
+def get_schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "api_url",
+                name = "API URL",
+                desc = "The base API URL for the tidbyt-updater API.",
+                icon = "gear",
+            ),
+            schema.Toggle(
+                id = "mock",
+                name = "Use mock data",
+                desc = "Whether to use mock data instead of fetching from MTA and Citibike APIs.",
+                icon = "gear",
+                default = False,
+            ),
         ],
     )
 
-def render_leave_time(leave_time):
+def LeaveTime(leave_time):
     return render.Row(
+        cross_align = "center",
         children = [
             # Train logo
             render.Circle(
@@ -79,7 +137,9 @@ def render_leave_time(leave_time):
         ],
     )
 
-def render_bikes(bike_data):
+def BikeData(bike_data):
+    regular_bike_count = int(bike_data["regular"])
+    ebike_count = int(bike_data["ebike"])
     return render.Row(
         children = [
             render.Image(IMAGE_BIKE),
@@ -89,60 +149,20 @@ def render_bikes(bike_data):
                     children = [
                         # Regular bike count
                         render.Text(
-                            content = str(int(bike_data["regular"])),
+                            content = str(regular_bike_count),
+                            color = COLORS["white"] if regular_bike_count > 0 else COLORS["gray"],
                             font = "tb-8",
                         ),
                         # Icon
                         render.Image(src = IMAGE_LIGHTNING, height = 7),
                         # E-bike count
                         render.Text(
-                            content = str(int(bike_data["ebike"])),
+                            content = str(ebike_count),
+                            color = COLORS["white"] if ebike_count > 0 else COLORS["gray"],
                             font = "tb-8",
                         ),
                     ],
                 ),
-            ),
-        ],
-    )
-
-def main(config):
-    data = get_transit_data(config)
-    trains = data["trains"]
-    return render.Root(
-        child = render.Padding(
-            # 1px of padding around all content
-            pad = (1, 1, 1, 0),
-            child = render.Column(
-                expanded = True,
-                main_align = "space_between",
-                children = [
-                    # Station 1
-                    render_leave_times(trains[0]["leave_times"]),
-                    # Station 2
-                    render_leave_times(trains[1]["leave_times"]),
-                    # Citibike counts
-                    render_bikes(data["citibike"]),
-                ],
-            ),
-        ),
-    )
-
-def get_schema():
-    return schema.Schema(
-        version = "1",
-        fields = [
-            schema.Text(
-                id = "api_url",
-                name = "API URL",
-                desc = "The base API URL for the tidbyt-updater API.",
-                icon = "gear",
-            ),
-            schema.Toggle(
-                id = "mock",
-                name = "Use mock data",
-                desc = "Whether to use mock data instead of fetching from MTA and Citibike APIs.",
-                icon = "gear",
-                default = False,
             ),
         ],
     )
