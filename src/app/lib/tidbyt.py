@@ -73,6 +73,7 @@ async def render_applet(
         pixlet_binary,
         "render",
         path,
+        "--silent",
         "--output",
         "-",  # Output bytes to stdout
         stdout=asyncio.subprocess.PIPE,
