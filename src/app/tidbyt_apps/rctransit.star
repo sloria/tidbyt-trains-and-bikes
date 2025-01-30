@@ -28,6 +28,12 @@ def get_transit_data(config):
         fail("Failed to fetch transit data")
     return response.json()
 
+COLORS = {
+    "white": "#FFF",
+    "dark_gray": "#1C1C1C",
+    "orange": "#FFA500",
+}
+
 # Train line colors
 ROUTE_COLORS = {
     "B": "#FF6319",
@@ -35,57 +41,39 @@ ROUTE_COLORS = {
     "2": "#EE352E",
     "3": "#EE352E",
 }
-DELAY_COLOR = "#FFA500"
 
 def render_leave_times(leave_times):
-    # TODO: Handle cases where there are < 2 leave times
-    next_leave_time = leave_times[0]
-    following_leave_time = leave_times[1]
-    return [
-        render_leave_time(next_leave_time),
-        render_leave_time(following_leave_time),
-    ]
+    return render.Row(
+        expanded = True,
+        children = [
+            render_leave_time(leave_times[0]),
+            render.Padding(
+                pad = (4, 0, 0, 0),
+                child = render_leave_time(leave_times[1]),
+            ) if len(leave_times) > 1 else None,
+        ],
+    )
 
 def render_leave_time(leave_time):
     return render.Row(
-        main_align = "start",
         children = [
             # Train logo
             render.Circle(
-                diameter = 8,
+                diameter = 10,
                 color = ROUTE_COLORS[leave_time["route"]],
                 child = render.Text(
-                    color = "#1C1C1C" if leave_time["route"] in ["N", "Q", "R", "W"] else "#FFF",
+                    color = COLORS["dark_gray"] if leave_time["route"] in ["N", "Q", "R", "W"] else COLORS["white"],
                     content = leave_time["route"],
                     font = "tb-8",
                 ),
             ),
             # Wait time
-            render.Box(
-                width = 22,
-                height = 8,
+            render.Padding(
+                pad = (2, 0, 0, 0),
                 child = render.Text(
-                    color = DELAY_COLOR if leave_time["has_delays"] else "#FFF",
+                    color = COLORS["orange"] if leave_time["has_delays"] else COLORS["white"],
                     content = str(int(leave_time["wait_time_minutes"])) + "m",
                     font = "tb-8",
-                ),
-            ),
-        ],
-    )
-
-def render_trains(trains):
-    station1 = trains[0]
-    station2 = trains[1]
-    return render.Column(
-        children = [
-            render.Row(
-                main_align = "start",
-                children = render_leave_times(station1["leave_times"]),
-            ),
-            render.Padding(
-                pad = (0, 2, 0, 0),
-                child = render.Row(
-                    children = render_leave_times(station2["leave_times"]),
                 ),
             ),
         ],
@@ -99,11 +87,14 @@ def render_bikes(bike_data):
                 pad = (2, 1, 0, 0),
                 child = render.Row(
                     children = [
+                        # Regular bike count
                         render.Text(
                             content = str(int(bike_data["regular"])),
                             font = "tb-8",
                         ),
+                        # Icon
                         render.Image(src = IMAGE_LIGHTNING, height = 7),
+                        # E-bike count
                         render.Text(
                             content = str(int(bike_data["ebike"])),
                             font = "tb-8",
@@ -116,18 +107,23 @@ def render_bikes(bike_data):
 
 def main(config):
     data = get_transit_data(config)
+    trains = data["trains"]
     return render.Root(
-        child = render.Column(
-            children = [
-                render.Padding(
-                    pad = (2, 2, 2, 1),
-                    child = render_trains(data["trains"]),
-                ),
-                render.Padding(
-                    pad = (2, 1, 2, 2),
-                    child = render_bikes(data["citibike"]),
-                ),
-            ],
+        child = render.Padding(
+            # 1px of padding around all content
+            pad = (1, 1, 1, 0),
+            child = render.Column(
+                expanded = True,
+                main_align = "space_between",
+                children = [
+                    # Station 1
+                    render_leave_times(trains[0]["leave_times"]),
+                    # Station 2
+                    render_leave_times(trains[1]["leave_times"]),
+                    # Citibike counts
+                    render_bikes(data["citibike"]),
+                ],
+            ),
         ),
     )
 
