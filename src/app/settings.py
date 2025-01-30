@@ -27,4 +27,5 @@ CITIBIKE_STATION_ID = os.environ["CITIBIKE_STATION_ID"]
 ### Periodic tasks ###
 
 TIDBYT_ENABLE_PUSH = bool(int(os.getenv("TIDBYT_ENABLE_PUSH", "0")))
-TIDBYT_PUSH_INTERVAL = float(os.getenv("TIDBYT_PUSH_INTERVAL", "5"))
+# Push interval in seconds
+TIDBYT_PUSH_INTERVAL = float(os.getenv("TIDBYT_PUSH_INTERVAL", "10"))
