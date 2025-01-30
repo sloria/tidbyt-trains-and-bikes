@@ -56,11 +56,11 @@ def main(config):
                                 render.Column(
                                     children = [
                                         # Station 1, first arrival
-                                        LeaveTime(station1["leave_times"][0]),
+                                        Departure(station1["departures"][0]),
                                         # Station 2, first arrival
                                         render.Padding(
                                             pad = (0, 1, 0, 0),
-                                            child = LeaveTime(station2["leave_times"][0]),
+                                            child = Departure(station2["departures"][0]),
                                         ),
                                     ],
                                 ),
@@ -69,11 +69,11 @@ def main(config):
                                     child = render.Column(
                                         children = [
                                             # Station 1, second arrival
-                                            LeaveTime(station1["leave_times"][1]),
+                                            Departure(station1["departures"][1]),
                                             # Station 2, second arrival
                                             render.Padding(
                                                 pad = (0, 1, 0, 0),
-                                                child = LeaveTime(station2["leave_times"][1]),
+                                                child = Departure(station2["departures"][1]),
                                             ),
                                         ],
                                     ),
@@ -115,17 +115,17 @@ def get_transit_data(config):
         fail("Failed to fetch transit data")
     return response.json()
 
-def LeaveTime(leave_time):
+def Departure(departure):
     return render.Row(
         cross_align = "center",
         children = [
             # Train logo
             render.Circle(
                 diameter = 10,
-                color = ROUTE_COLORS[leave_time["route"]],
+                color = ROUTE_COLORS[departure["route"]],
                 child = render.Text(
-                    color = COLORS["dark_gray"] if leave_time["route"] in ("N", "Q", "R", "W") else COLORS["white"],
-                    content = leave_time["route"],
+                    color = COLORS["dark_gray"] if departure["route"] in ("N", "Q", "R", "W") else COLORS["white"],
+                    content = departure["route"],
                     font = "tb-8",
                 ),
             ),
@@ -133,8 +133,8 @@ def LeaveTime(leave_time):
             render.Padding(
                 pad = (2, 0, 0, 0),
                 child = render.Text(
-                    color = COLORS["orange"] if leave_time["has_delays"] else COLORS["white"],
-                    content = str(int(leave_time["wait_time_minutes"])) + "m",
+                    color = COLORS["orange"] if departure["has_delays"] else COLORS["white"],
+                    content = str(int(departure["wait_time_minutes"])) + "m",
                     font = "tb-8",
                 ),
             ),

@@ -10,7 +10,7 @@ from litestar.logging import LoggingConfig
 
 from app import settings
 from app.lib.citibike import get_bike_counts
-from app.lib.mta import ServiceAlert, TrainLeaveTime, get_station_data
+from app.lib.mta import ServiceAlert, TrainDeparture, get_station_data
 from app.tasks import periodic_tasks
 
 ### Logging ###
@@ -22,11 +22,10 @@ logging_config = LoggingConfig(
     },
     log_exceptions="always",
 )
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging_config.configure()()
 
-# Set httpx logging to the warning level
-logging.getLogger("httpx").setLevel(logging.WARNING)
 
 ### Data models ###
 
@@ -35,24 +34,24 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 class TrainStationData:
     station_id: str
     alerts: list[ServiceAlert] = field(default_factory=list)
-    leave_times: list[TrainLeaveTime] = field(default_factory=list)
+    departures: list[TrainDeparture] = field(default_factory=list)
 
     @classmethod
     async def from_station_id(
         cls, station_id: str, *, routes: set[str]
     ) -> TrainStationData:
-        """Initialize TrainStationData with leave times for specified routes.
+        """Initialize TrainStationData with departures for specified routes.
         Fetches data from the MTA GTFS feed.
         """
         station_data = await get_station_data(routes, station_id)
         return cls(
             station_id=station_id,
             alerts=station_data.alerts,
-            leave_times=[
-                # Only return leave times for trains we can actually catch
-                leave_time
-                for leave_time in station_data.leave_times
-                if leave_time.wait_time_minutes and leave_time.wait_time_minutes >= 2
+            departures=[
+                # Only return departures for trains we can actually catch
+                departure
+                for departure in station_data.departures
+                if departure.wait_time_minutes and departure.wait_time_minutes >= 2
             ],
         )
 
@@ -84,21 +83,21 @@ def get_mock_data():
         trains=[
             TrainStationData(
                 station_id="A01",
-                leave_times=[
-                    TrainLeaveTime(
+                departures=[
+                    TrainDeparture(
                         route="B",
                         time=1633063200,
                         wait_time_minutes=19,
                         has_delays=True,
                     ),
-                    TrainLeaveTime(route="Q", time=1633063200, wait_time_minutes=2),
+                    TrainDeparture(route="Q", time=1633063200, wait_time_minutes=2),
                 ],
             ),
             TrainStationData(
                 station_id="A02",
-                leave_times=[
-                    TrainLeaveTime(route="2", time=1633063200, wait_time_minutes=1),
-                    TrainLeaveTime(route="3", time=1633063200, wait_time_minutes=5),
+                departures=[
+                    TrainDeparture(route="2", time=1633063200, wait_time_minutes=1),
+                    TrainDeparture(route="3", time=1633063200, wait_time_minutes=5),
                 ],
             ),
         ],

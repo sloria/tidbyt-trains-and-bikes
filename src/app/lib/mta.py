@@ -66,10 +66,10 @@ def get_feed_url(route: str) -> str:
     return f"{MTA_BASE_URL}{'-' + suffix if suffix else ''}"
 
 
-def _get_leave_time(
+def _get_departure_time(
     stop_time_update: gtfs_realtime_pb2.TripUpdate.StopTimeUpdate,
 ) -> int:
-    """Get the leave time from a stop time update."""
+    """Get the departure time from a stop time update."""
     # Feed is inconsistent about when arrival/departure are specified, so fall back to arrival time if departure is missing.
     if (
         stop_time_update.HasField("departure")
@@ -125,7 +125,7 @@ class ServiceAlert:
 
 
 @dataclass
-class TrainLeaveTime:
+class TrainDeparture:
     route: str
     time: int
     # Whether there are service alerts for delays for this train
@@ -143,7 +143,7 @@ class TrainLeaveTime:
 class TrainStationData:
     station_id: str
     alerts: list[ServiceAlert] = field(default_factory=list)
-    leave_times: list[TrainLeaveTime] = field(default_factory=list)
+    departures: list[TrainDeparture] = field(default_factory=list)
 
 
 async def get_station_data(routes: set[str], station_id: str) -> TrainStationData:
@@ -188,11 +188,11 @@ async def get_station_data(routes: set[str], station_id: str) -> TrainStationDat
             feed = gtfs_realtime_pb2.FeedMessage()
             feed.ParseFromString(response.content)
 
-            station_data.leave_times.extend(
+            station_data.departures.extend(
                 [
-                    TrainLeaveTime(
+                    TrainDeparture(
                         route=entity.trip_update.trip.route_id,
-                        time=_get_leave_time(stop_time_update),
+                        time=_get_departure_time(stop_time_update),
                         has_delays=entity.trip_update.trip.route_id
                         in routes_with_delays,
                     )
@@ -204,7 +204,7 @@ async def get_station_data(routes: set[str], station_id: str) -> TrainStationDat
                 ]
             )
 
-    station_data.leave_times.sort(key=lambda lt: lt.time)
+    station_data.departures.sort(key=lambda lt: lt.time)
     return station_data
 
 
