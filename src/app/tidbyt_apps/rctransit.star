@@ -19,13 +19,22 @@ COLORS = {
     "orange": "#FFA500",
 }
 
-# Train line colors
-ROUTE_COLORS = {
-    "B": "#FF6319",
-    "Q": "#FCCC0A",
-    "2": "#EE352E",
-    "3": "#EE352E",
+# Train route colors
+# https://api.mta.info/#/subwayRealTimeFeeds
+COLORS_FOR_ROUTES = {
+    "#0039a6": ("A", "C", "E"),
+    "#ff6319": ("B", "D", "F", "M"),
+    "#6cbe45": ("G",),
+    "#8fa5a1": ("J", "Z"),
+    "#fccc0a": ("N", "Q", "R", "W"),
+    "#a7a9ac": ("L",),
+    "#ee352e": ("1", "2", "3"),
+    "#00933c": ("4", "5", "6"),
+    "#b933ad": ("7",),
+    "#808183": ("S", "SR", "SF"),
+    "#0078c6": ("SIR",),
 }
+ROUTE_COLORS = {route: color for color, routes in COLORS_FOR_ROUTES.items() for route in routes}
 
 def main(config):
     data = get_transit_data(config)
@@ -115,7 +124,7 @@ def LeaveTime(leave_time):
                 diameter = 10,
                 color = ROUTE_COLORS[leave_time["route"]],
                 child = render.Text(
-                    color = COLORS["dark_gray"] if leave_time["route"] in ["N", "Q", "R", "W"] else COLORS["white"],
+                    color = COLORS["dark_gray"] if leave_time["route"] in ("N", "Q", "R", "W") else COLORS["white"],
                     content = leave_time["route"],
                     font = "tb-8",
                 ),
