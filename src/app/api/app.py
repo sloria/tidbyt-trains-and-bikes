@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 
 from litestar import Litestar, get
@@ -23,6 +24,9 @@ logging_config = LoggingConfig(
 )
 
 logger = logging_config.configure()()
+
+# Set httpx logging to the warning level
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 ### Data models ###
 
