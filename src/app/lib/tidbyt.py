@@ -51,14 +51,29 @@ async def push_to_tidbyt(
 
 @overload
 async def render_applet(
-    path: str, *, pixlet_binary: str | None = None, as_bytes: Literal[False] = ...
+    path: str,
+    *,
+    pixlet_binary: str | None = None,
+    as_bytes: Literal[False] = False,
 ) -> str: ...
 
 
 @overload
 async def render_applet(
-    path: str, *, pixlet_binary: str | None = None, as_bytes: Literal[True] = ...
+    path: str,
+    *,
+    pixlet_binary: str | None = None,
+    as_bytes: Literal[True],
 ) -> bytes: ...
+
+
+@overload
+async def render_applet(
+    path: str,
+    *,
+    pixlet_binary: str | None = None,
+    as_bytes: bool,
+) -> str | bytes: ...
 
 
 async def render_applet(
@@ -90,8 +105,32 @@ async def render_applet(
     return base64.b64encode(output_bytes).decode("utf-8")
 
 
+@overload
 async def render_applet_with_replacements(
-    path: str, *, replacements: dict[str, str], **kwargs
+    path: str,
+    *,
+    replacements: dict[str, str],
+    pixlet_binary: str | None = None,
+    as_bytes: Literal[False] = False,
+) -> str: ...
+
+
+@overload
+async def render_applet_with_replacements(
+    path: str,
+    *,
+    replacements: dict[str, str],
+    pixlet_binary: str | None = None,
+    as_bytes: Literal[True],
+) -> bytes: ...
+
+
+async def render_applet_with_replacements(
+    path: str,
+    *,
+    replacements: dict[str, str],
+    pixlet_binary: str | None = None,
+    as_bytes: bool = False,
 ) -> bytes | str:
     """Render a Pixlet applet with replaced constants. This is necessary for
     e.g., replacing server URLs within applets because applets can't read
@@ -110,4 +149,6 @@ async def render_applet_with_replacements(
     with tempfile.NamedTemporaryFile(mode="w", suffix=".star") as tmp_file:
         tmp_file.write(modified_content)
         tmp_file.flush()
-        return await render_applet(tmp_file.name, **kwargs)
+        return await render_applet(
+            tmp_file.name, pixlet_binary=pixlet_binary, as_bytes=as_bytes
+        )

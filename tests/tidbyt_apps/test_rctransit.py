@@ -34,7 +34,9 @@ async def render_with_mock_data(monkeypatch):
             base_url = client.base_url
             # Replace API_URL = "..." with the running server's URL in the Tidbyt app and render it
             return await render_applet_with_replacements(
-                TIDBYT_APP_PATH, replacements={"API_URL": base_url}, as_bytes=True
+                str(TIDBYT_APP_PATH),
+                replacements={"API_URL": str(base_url)},
+                as_bytes=True,
             )
 
     return _render_with_mock_data
