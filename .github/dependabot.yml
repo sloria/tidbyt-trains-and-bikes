@@ -1,0 +1,7 @@
+version: 2
+updates:
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "monthly"
+# TODO: Add uv when https://github.com/dependabot/dependabot-core/issues/10478 lands
