@@ -3,7 +3,7 @@ import pathlib
 import pytest
 from litestar.testing import subprocess_async_client
 
-from app.api.mocks import TransitDataMock
+from app.api.mocks import TransitDataMockName, TransitDataMocks
 from app.lib.tidbyt import render_applet_with_replacements
 from app.tasks import TIDBYT_APP_PATH
 from tests.syrupy_extensions import WebPImageSnapshotExtension
@@ -25,12 +25,14 @@ async def render_with_mock_data(monkeypatch):
     returning the webp file as bytes.
     """
 
-    async def _render_with_mock_data(mock: TransitDataMock) -> bytes:
-        monkeypatch.setenv("MOCK", mock.name)
+    async def _render_with_mock_data(mock_name: TransitDataMockName) -> bytes:
+        monkeypatch.setenv("MOCK", mock_name)
+        # Run the API server in a subprocess while running the Tidbyt app
         async with subprocess_async_client(
             workdir=ROOT, app="app.api.app:app"
         ) as client:
             base_url = client.base_url
+            # Replace API_URL = "..." with the running server's URL in the Tidbyt app and render it
             return await render_applet_with_replacements(
                 TIDBYT_APP_PATH, replacements={"API_URL": base_url}, as_bytes=True
             )
@@ -40,7 +42,7 @@ async def render_with_mock_data(monkeypatch):
 
 @pytest.mark.parametrize(
     "transit_data_mock",
-    (TransitDataMock.basic, TransitDataMock.long_wait_times, TransitDataMock.no_bikes),
+    TransitDataMocks,
 )
 async def test_rendered_output_matches_snapshots(
     render_with_mock_data, transit_data_mock, snapshot
