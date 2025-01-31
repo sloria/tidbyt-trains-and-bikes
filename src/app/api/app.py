@@ -2,15 +2,22 @@
 
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
+from typing import TYPE_CHECKING
+
 import structlog
+from apscheduler import AsyncScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 from litestar import Litestar, get
 
-from app import settings
-from app.tasks import periodic_tasks
+from app import settings, tasks
 
 from .log import structlog_plugin
 from .mocks import TransitDataMockName, TransitDataMocks
 from .models import BikeStationData, TrainStationData, TransitData
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
 
 logger = structlog.get_logger()
 
@@ -37,21 +44,22 @@ async def transit(*, mock: TransitDataMockName | None = None) -> TransitData:
 ### Periodic tasks ###
 
 
-async def start_periodic_tasks(app: Litestar):
-    for task in periodic_tasks:
-        task.start()
-
-
-async def stop_periodic_tasks(app: Litestar):
-    for task in periodic_tasks:
-        await task.stop()
+@asynccontextmanager
+async def schedule_period_tasks(app: Litestar) -> AsyncGenerator[None]:
+    async with AsyncScheduler() as scheduler:
+        if settings.TIDBYT_ENABLE_PUSH:
+            await scheduler.add_schedule(
+                tasks.render_and_push_to_tidbyt,
+                IntervalTrigger(seconds=settings.TIDBYT_PUSH_INTERVAL),
+            )
+        await scheduler.start_in_background()
+        yield
 
 
 ### The ASGI App ###
 
 app = Litestar(
     route_handlers=[transit],
-    on_startup=[start_periodic_tasks],
-    on_shutdown=[stop_periodic_tasks],
+    lifespan=[schedule_period_tasks],
     plugins=[structlog_plugin],
 )

@@ -6,7 +6,6 @@ import structlog
 from litestar.stores.memory import MemoryStore
 
 from app import settings
-from app.lib.periodic_task import PeriodicTask
 from app.lib.tidbyt import push_to_tidbyt, render_applet
 
 logger = structlog.get_logger()
@@ -22,12 +21,14 @@ async def render_and_push_to_tidbyt() -> None:
     """Render the Tidbyt applet and push to TidByt if the image has changed."""
     cached_data = await store.get("image_data")
     previous_data = cached_data.decode("utf-8") if cached_data else None
-    logger.info("rendering and pushing to TidByt")
+    log = logger.bind(tidbyt_app=TIDBYT_APP_PATH.name)
+    log.debug("rendering tidbyt app")
     image_data = await render_applet(
         str(TIDBYT_APP_PATH), pixlet_binary=settings.PIXLET_PATH
     )
     # Only push to TidByt if the image has changed to prevent getting rate limited
     if image_data != previous_data:
+        log.debug("pushing tidbyt app")
         await store.set("image_data", image_data)
         await push_to_tidbyt(
             image_data=image_data,
@@ -37,14 +38,4 @@ async def render_and_push_to_tidbyt() -> None:
             background=True,
         )
     else:
-        logger.info("cache hit: no image change, skipping push")
-
-
-periodic_tasks: list[PeriodicTask] = []
-if settings.TIDBYT_ENABLE_PUSH:
-    periodic_tasks.append(
-        PeriodicTask(
-            render_and_push_to_tidbyt,
-            interval=settings.TIDBYT_PUSH_INTERVAL,
-        )
-    )
+        log.info("cache hit: no image change, skipping push")

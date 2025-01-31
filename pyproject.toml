@@ -5,6 +5,7 @@ version = "0.1.0"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "apscheduler>=4.0.0a5",
     "gtfs-realtime-bindings>=1.0.0",
     "httpx>=0.28.1",
     "litestar[standard,structlog]>=2.14.0",
