@@ -5,7 +5,7 @@ from enum import Enum
 from polyfactory import Use
 from polyfactory.factories import DataclassFactory
 
-from .app import (
+from .models import (
     BikeStationData,
     ServiceAlert,
     TrainDeparture,
