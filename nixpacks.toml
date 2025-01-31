@@ -1,0 +1,15 @@
+# https://nixpacks.com/docs/configuration/file
+
+[phases.install]
+cmds = [
+  '...',
+  '''
+  curl -LO https://github.com/tidbyt/pixlet/releases/download/v0.34.0/pixlet_0.34.0_linux_amd64.tar.gz && \
+  tar -xvf pixlet_0.34.0_linux_amd64.tar.gz && \
+  chmod +x pixlet && \
+  mv pixlet /opt/venv/bin
+  ''',
+]
+
+[start]
+cmd = 'litestar run --host 0.0.0.0 --port 8000'
