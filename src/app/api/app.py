@@ -8,7 +8,7 @@ from litestar import Litestar, get
 from litestar.logging import LoggingConfig
 
 from app import settings
-from app.api.mocks import TransitDataMock
+from app.api.mocks import TransitDataMockName, TransitDataMocks
 from app.api.models import BikeStationData, TrainStationData, TransitData
 from app.tasks import periodic_tasks
 
@@ -29,12 +29,12 @@ logger = logging_config.configure()()
 ### Route handlers ###
 
 
-@get("/transit", cache=5)  # keep response cached for 5 seconds
-async def transit(*, mock: str | None = None) -> TransitData:
+@get("/transit", cache=5)
+async def transit(*, mock: TransitDataMockName | None = None) -> TransitData:
     mock_name = mock or settings.MOCK
     if mock_name:
         logger.debug("returning mock data")
-        return TransitDataMock[mock_name].value
+        return TransitDataMocks[mock_name]
     return TransitData(
         trains=[
             await TrainStationData.from_station_id(

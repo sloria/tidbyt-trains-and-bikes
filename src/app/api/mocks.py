@@ -1,6 +1,8 @@
 """Mock response data."""
 
-from enum import Enum
+from __future__ import annotations
+
+from typing import Literal
 
 from polyfactory import Use
 from polyfactory.factories import DataclassFactory
@@ -65,10 +67,9 @@ class TransitDataFactory(DataclassFactory[TransitData]):
     ]
 
 
-class TransitDataMock(Enum):
-    basic = TransitDataFactory.build()
-
-    long_wait_times = TransitDataFactory.build(
+TransitDataMocks: dict[str, TransitData] = {
+    "basic": TransitDataFactory.build(),
+    "long_wait_times": TransitDataFactory.build(
         trains=[
             TrainStationDataFactory.build(
                 station_id="A01",
@@ -93,8 +94,9 @@ class TransitDataMock(Enum):
                 ],
             ),
         ]
-    )
-
-    no_bikes = TransitDataFactory.build(
+    ),
+    "no_bikes": TransitDataFactory.build(
         citibike=BikeStationDataFactory.build(regular=0, ebike=0),
-    )
+    ),
+}
+TransitDataMockName = Literal["basic", "long_wait_times", "no_bikes"]
