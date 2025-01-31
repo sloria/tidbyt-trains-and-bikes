@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import base64
-import logging
 import re
 import tempfile
 from pathlib import Path
 from typing import Literal, overload
 
 import httpx
+import structlog
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
 
 
 class TidbytError(Exception):

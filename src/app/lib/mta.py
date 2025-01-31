@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import datetime as dt
-import logging
 from dataclasses import dataclass, field
 from enum import IntEnum
 
 import httpx
+import structlog
 from google.transit import gtfs_realtime_pb2
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
 
 # https://api.mta.info/#/subwayRealTimeFeeds
 MTA_BASE_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"

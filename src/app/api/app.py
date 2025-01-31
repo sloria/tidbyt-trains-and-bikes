@@ -2,31 +2,17 @@
 
 from __future__ import annotations
 
-import logging
-
+import structlog
 from litestar import Litestar, get
-from litestar.logging import LoggingConfig
 
 from app import settings
-from app.api.mocks import TransitDataMockName, TransitDataMocks
-from app.api.models import BikeStationData, TrainStationData, TransitData
 from app.tasks import periodic_tasks
 
-### Logging ###
+from .log import structlog_plugin
+from .mocks import TransitDataMockName, TransitDataMocks
+from .models import BikeStationData, TrainStationData, TransitData
 
-logging_config = LoggingConfig(
-    root={"level": "INFO", "handlers": ["queue_listener"]},
-    formatters={
-        "standard": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
-    },
-    log_exceptions="always",
-)
-logging.getLogger("httpx").setLevel(logging.WARNING)
-
-logger = logging_config.configure()()
-
-
-### Route handlers ###
+logger = structlog.get_logger()
 
 
 @get("/transit", cache=5)
@@ -67,4 +53,5 @@ app = Litestar(
     route_handlers=[transit],
     on_startup=[start_periodic_tasks],
     on_shutdown=[stop_periodic_tasks],
+    plugins=[structlog_plugin],
 )

@@ -1,15 +1,15 @@
 """Periodic tasks."""
 
-import logging
 from pathlib import Path
 
+import structlog
 from litestar.stores.memory import MemoryStore
 
 from app import settings
 from app.lib.periodic_task import PeriodicTask
 from app.lib.tidbyt import push_to_tidbyt, render_applet
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
 
 HERE = Path(__file__).parent.resolve()
 TIDBYT_APP_PATH = HERE / ".." / "tidbyt_apps" / "rctransit.star"
