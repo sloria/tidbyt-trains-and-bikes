@@ -13,12 +13,6 @@ pytestmark = pytest.mark.anyio
 ROOT = pathlib.Path(__file__).parent.parent.parent  # project root
 
 
-# Required for pytest-anyio
-@pytest.fixture(scope="session")
-def anyio_backend() -> str:
-    return "asyncio"
-
-
 # Make syrupy save snapshots as individual webp files
 @pytest.fixture
 def snapshot(snapshot):

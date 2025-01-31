@@ -7,6 +7,8 @@ import pytest
 
 from app.lib.periodic_task import PeriodicTask
 
+pytestmark = pytest.mark.anyio
+
 
 @pytest.fixture
 def events() -> list[str]:
@@ -21,7 +23,6 @@ def record_event(events: list[str]):
     return _record_event
 
 
-@pytest.mark.asyncio
 async def test_start(record_event, events):
     task = PeriodicTask(record_event, interval=0.1)
     task.start()
@@ -32,7 +33,6 @@ async def test_start(record_event, events):
     assert len(events) >= 2
 
 
-@pytest.mark.asyncio
 async def test_stop(record_event, events):
     task = PeriodicTask(record_event, interval=0.1)
     task.start()
@@ -45,7 +45,6 @@ async def test_stop(record_event, events):
     assert len(events) == initial_count  # No more executions after stop
 
 
-@pytest.mark.asyncio
 async def test_task_executes_at_interval():
     execution_count = 0
 
@@ -64,7 +63,6 @@ async def test_task_executes_at_interval():
     assert execution_count == 1
 
 
-@pytest.mark.asyncio
 async def test_multiple_starts():
     mock_func = AsyncMock()
     task = PeriodicTask(mock_func, interval=0.1)
@@ -77,7 +75,6 @@ async def test_multiple_starts():
     await task.stop()
 
 
-@pytest.mark.asyncio
 async def test_multiple_stops():
     mock_func = AsyncMock()
     task = PeriodicTask(mock_func, interval=0.1)
@@ -87,7 +84,6 @@ async def test_multiple_stops():
     await task.stop()  # Should not raise
 
 
-@pytest.mark.asyncio
 async def test_task_cleanup_on_stop(events):
     async def cleanup_task():
         try:
