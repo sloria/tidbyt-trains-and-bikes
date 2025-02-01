@@ -112,10 +112,12 @@ TransitDataMocks: dict[TransitDataMockName, TransitData] = {
         trains=[
             TrainStationDataFactory.build(
                 station_id="A01",
+                routes=["B", "Q"],
                 departures=[],
             ),
             TrainStationDataFactory.build(
                 station_id="A02",
+                routes=["2", "3"],
                 departures=[
                     TrainDepartureFactory.build(
                         route="2", wait_time_minutes=3, has_delays=False
@@ -131,6 +133,7 @@ TransitDataMocks: dict[TransitDataMockName, TransitData] = {
         trains=[
             TrainStationDataFactory.build(
                 station_id="A01",
+                routes=["B", "Q"],
                 departures=[
                     TrainDepartureFactory.build(
                         route="Q", wait_time_minutes=2, has_delays=False
@@ -142,6 +145,7 @@ TransitDataMocks: dict[TransitDataMockName, TransitData] = {
             ),
             TrainStationDataFactory.build(
                 station_id="A02",
+                routes=["2", "3"],
                 departures=[],
             ),
         ],
@@ -150,11 +154,13 @@ TransitDataMocks: dict[TransitDataMockName, TransitData] = {
         trains=[
             TrainStationDataFactory.build(
                 station_id="A01",
+                routes=["B", "Q"],
                 alerts=[],
                 departures=[],
             ),
             TrainStationDataFactory.build(
                 station_id="A02",
+                routes=["2", "3"],
                 alerts=[],
                 departures=[],
             ),
