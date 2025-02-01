@@ -57,7 +57,7 @@ def main(config):
 
 def NoScheduledTrains():
     return render.Marquee(height = 22, scroll_direction = "vertical", child = render.WrappedText(
-        width=28,
+        width = 28,
         content = "No trains on sched",
         color = COLORS["orange"],
         font = "tb-8",

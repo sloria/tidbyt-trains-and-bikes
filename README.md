@@ -2,13 +2,22 @@
 
 Tidbyt app to display NYC subway times for multiple stations and Citibike availability _on one screen_.
 
-## Why not use the official apps?
+![Screenshot](./assets/screenshot.gif)
 
-Tidbyt's official NYC Subway app limits you to viewing one station at a time, and Citibike info is in a separate app.
-Checking all the transit options means waiting for multiple screens. This app consolidates everything I need
-for my commutes into one display.
+## Contents
 
-## Dev setup
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Running it locally](#running-it-locally)
+  - [Pushing to your Tidbyt](#pushing-to-your-tidbyt)
+- [FAQ](#faq)
+  - [Why not use the official apps?](#why-not-use-the-official-apps)
+  - [Why not publish this as a community app?](#why-not-publish-this-as-a-community-app)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Running it locally
 
 Install deps (requires [uv](https://docs.astral.sh/uv/getting-started/installation/)):
 
@@ -35,12 +44,32 @@ make serve
 
 Open http://localhost:8080/ to view the TidByt preview app.
 
-Or run the servers individually:
+### Pushing to your Tidbyt
+
+To actually show the app on your Tidbyt, make sure that `TIDBYT_API_KEY` and `TIDBYT_DEVICE_ID` in `.env`.
+You can find these in the Tidbyt mobile app.
 
 ```
-make serve-api
+TIDBYT_API_KEY=CHANGEME
+TIDBYT_DEVICE_ID=CHANGME
 ```
 
+Then run the server with `TIDBYT_ENABLE_PUSH=1`:
+
 ```
-make serve-tidbyt
+TIDBYT_ENABLE_PUSH=1 make serve
 ```
+
+## FAQ
+
+### Why not use the official apps?
+
+Tidbyt's official NYC Subway app limits you to viewing one station at a time, and Citibike info is in a separate app.
+Checking all the transit options means waiting for multiple screens. This app consolidates everything I need
+into one screen.
+
+### Why not publish this as a community app?
+
+Short answer: This code was written specifically for my apartment. I’m not particularly interested in supporting community usage.
+
+Slightly longer answer: Tidbyt's Starlark SDK has limitations when it comes to querying complex APIs like the MTA's GTFS feed. This requires the use of a proxy server, which means the app is no longer purely Starlark-based. I have no desire to expose the proxy server to the internet or have others depend on it for their devices.

@@ -18,3 +18,9 @@ repos:
       language: system
       types: [text]
       files: '\.star$'
+- repo: https://github.com/thlorenz/doctoc.git
+  rev: v2.2.0
+  hooks:
+    - id: doctoc
+      name: Add TOC for Markdown and RST files
+      files: README\.md
