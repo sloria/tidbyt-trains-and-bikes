@@ -25,8 +25,9 @@ jobs:
           curl -LO https://github.com/tidbyt/pixlet/releases/download/v0.34.0/pixlet_0.34.0_linux_amd64.tar.gz
           tar -xvf pixlet_0.34.0_linux_amd64.tar.gz
           chmod +x pixlet
-          sudo mv pixlet /usr/local/bin/
+          mv pixlet /usr/local/bin/
           cd -
+          rm -rf /tmp/pixlet-install
 
       - name: Load cached pre-commit dependencies
         id: cached-pre-commit-dependencies
@@ -68,8 +69,9 @@ jobs:
           curl -LO https://github.com/tidbyt/pixlet/releases/download/v0.34.0/pixlet_0.34.0_linux_amd64.tar.gz
           tar -xvf pixlet_0.34.0_linux_amd64.tar.gz
           chmod +x pixlet
-          sudo mv pixlet /usr/local/bin/
+          mv pixlet /usr/local/bin/
           cd -
+          rm -rf /tmp/pixlet-install
 
       - name: Copy test .env file
         run: cp tests/.env.test .env
