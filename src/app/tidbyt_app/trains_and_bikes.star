@@ -162,12 +162,12 @@ def Departure(departure):
     )
 
 def NoScheduledTrains():
-    return render.Marquee(height = 22, scroll_direction = "vertical", child = render.WrappedText(
+    return render.WrappedText(
         width = 28,
-        content = "No trains on sched",
+        content = "No trains",
         color = COLORS["orange"],
         font = "tb-8",
-    ))
+    )
 
 def BikeData(bike_data):
     regular_bike_count = int(bike_data["regular"])
