@@ -9,7 +9,7 @@ serve:
 .PHONY: serve-api
 serve-api:
 	@echo "Starting the API server... 🚀"
-	@litestar run --reload --port 8000 --debug
+	@uv run litestar run --reload --port 8000 --debug
 
 .PHONY: serve-tidbyt
 serve-tidbyt:

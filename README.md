@@ -23,8 +23,6 @@ Install deps (requires [uv](https://docs.astral.sh/uv/getting-started/installati
 
 ```
 uv sync
-source .venv/bin/activate
-
 brew install pixlet parallel
 ```
 
