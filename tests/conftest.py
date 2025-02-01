@@ -6,6 +6,7 @@ from litestar import Litestar
 from litestar.testing import AsyncTestClient
 
 from app import settings
+from app.api.app import app
 
 HERE = Path(__file__).parent.resolve()
 
@@ -24,7 +25,5 @@ def _patch_settings(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture
 async def client() -> AsyncIterator[AsyncTestClient[Litestar]]:
-    from app.api.app import app
-
     async with AsyncTestClient(app) as client:
         yield client
