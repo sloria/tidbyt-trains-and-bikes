@@ -9,6 +9,7 @@ from app.lib.mta import ServiceAlert, TrainDeparture, get_station_data
 @dataclass
 class TrainStationData:
     station_id: str
+    routes: list[str]
     alerts: list[ServiceAlert] = field(default_factory=list)
     departures: list[TrainDeparture] = field(default_factory=list)
 
@@ -22,6 +23,7 @@ class TrainStationData:
         station_data = await get_station_data(station_id, routes=routes)
         return cls(
             station_id=station_id,
+            routes=sorted(routes),
             alerts=station_data.alerts,
             departures=[
                 # Only return departures for trains we can actually catch

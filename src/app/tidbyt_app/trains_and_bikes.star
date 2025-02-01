@@ -117,7 +117,7 @@ def TrainData(trains):
                         child = Departure(station1["departures"][1]),
                     ),
                 ] if station1["departures"] else [
-                    NoScheduledTrains(),
+                    NoScheduledTrains(station1["routes"]),
                 ],
             ),
             # Station 2 departures
@@ -129,7 +129,7 @@ def TrainData(trains):
                         child = Departure(station2["departures"][1]),
                     ),
                 ] if station2["departures"] else [
-                    NoScheduledTrains(),
+                    NoScheduledTrains(station2["routes"]),
                 ],
             ),
         ],
@@ -161,10 +161,10 @@ def Departure(departure):
         ],
     )
 
-def NoScheduledTrains():
+def NoScheduledTrains(routes):
     return render.WrappedText(
         width = 28,
-        content = "No trains",
+        content = "No {} trains".format("-".join(routes)),
         color = COLORS["orange"],
         font = "tb-8",
     )
