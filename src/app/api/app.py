@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import structlog
 from litestar import Litestar, get
@@ -32,7 +32,7 @@ async def transit(*, mock: TransitDataMockName | None = None) -> TransitData:
     mock_name = mock or settings.MOCK
     if mock_name:
         logger.debug("returning mock data")
-        return TransitDataMocks[mock_name]
+        return TransitDataMocks[cast(TransitDataMockName, mock_name)]
     return TransitData(
         trains=[
             await TrainStationData.from_station_id(
