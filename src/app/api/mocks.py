@@ -32,6 +32,7 @@ class ServiceAlertFactory(DataclassFactory[ServiceAlert]):
 
 class TrainDepartureFactory(DataclassFactory[TrainDeparture]):
     __set_as_default_factory_for_type__ = True
+    route = Use(DataclassFactory.__random__.choice, ["B", "Q", "2", "3"])
 
 
 class TrainStationDataFactory(DataclassFactory[TrainStationData]):
@@ -67,7 +68,15 @@ class TransitDataFactory(DataclassFactory[TransitData]):
     ]
 
 
-TransitDataMockName = Literal["basic", "long_wait_times", "zero_bikes", "mta_down"]
+TransitDataMockName = Literal[
+    "basic",
+    "long_wait_times",
+    "zero_bikes",
+    "mta_down",
+    "zero_trains_at_station_1",
+    "zero_trains_at_station_2",
+    "zero_trains",
+]
 TransitDataMocks: dict[TransitDataMockName, TransitData] = {
     "basic": TransitDataFactory.build(),
     "long_wait_times": TransitDataFactory.build(
@@ -99,7 +108,45 @@ TransitDataMocks: dict[TransitDataMockName, TransitData] = {
     "zero_bikes": TransitDataFactory.build(
         citibike=BikeStationDataFactory.build(regular=0, ebike=0),
     ),
-    "mta_down": TransitDataFactory.build(
+    "zero_trains_at_station_1": TransitDataFactory.build(
+        trains=[
+            TrainStationDataFactory.build(
+                station_id="A01",
+                departures=[],
+            ),
+            TrainStationDataFactory.build(
+                station_id="A02",
+                departures=[
+                    TrainDepartureFactory.build(
+                        route="2", wait_time_minutes=3, has_delays=False
+                    ),
+                    TrainDepartureFactory.build(
+                        route="3", wait_time_minutes=8, has_delays=False
+                    ),
+                ],
+            ),
+        ],
+    ),
+    "zero_trains_at_station_2": TransitDataFactory.build(
+        trains=[
+            TrainStationDataFactory.build(
+                station_id="A01",
+                departures=[
+                    TrainDepartureFactory.build(
+                        route="Q", wait_time_minutes=2, has_delays=False
+                    ),
+                    TrainDepartureFactory.build(
+                        route="B", wait_time_minutes=19, has_delays=True
+                    ),
+                ],
+            ),
+            TrainStationDataFactory.build(
+                station_id="A02",
+                departures=[],
+            ),
+        ],
+    ),
+    "zero_trains": TransitDataFactory.build(
         trains=[
             TrainStationDataFactory.build(
                 station_id="A01",
@@ -107,7 +154,7 @@ TransitDataMocks: dict[TransitDataMockName, TransitData] = {
                 departures=[],
             ),
             TrainStationDataFactory.build(
-                station_id="A01",
+                station_id="A02",
                 alerts=[],
                 departures=[],
             ),

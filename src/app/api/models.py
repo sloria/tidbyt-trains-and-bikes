@@ -19,7 +19,7 @@ class TrainStationData:
         """Initialize TrainStationData with departures for specified routes.
         Fetches data from the MTA GTFS feed.
         """
-        station_data = await get_station_data(routes, station_id)
+        station_data = await get_station_data(station_id, routes=routes)
         return cls(
             station_id=station_id,
             alerts=station_data.alerts,

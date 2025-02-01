@@ -55,11 +55,19 @@ def main(config):
         ),
     )
 
+def NoScheduledTrains():
+    return render.Marquee(height = 22, scroll_direction = "vertical", child = render.WrappedText(
+        width=28,
+        content = "No trains on sched",
+        color = COLORS["orange"],
+        font = "tb-8",
+    ))
+
 def TrainData(trains):
     station1, station2 = trains
-    if not station1["departures"] or not station2["departures"]:
-        return render.Box(height = 21, child = render.Text(
-            content = "MTA API down",
+    if len(station1["departures"]) + len(station2["departures"]) == 0:
+        return render.Box(height = 22, child = render.WrappedText(
+            content = "No trains scheduled",
             color = COLORS["orange"],
             font = "tb-8",
         ))
@@ -75,6 +83,8 @@ def TrainData(trains):
                         pad = (0, 1, 0, 0),
                         child = Departure(station1["departures"][1]),
                     ),
+                ] if station1["departures"] else [
+                    NoScheduledTrains(),
                 ],
             ),
             # Station 2 departures
@@ -85,6 +95,8 @@ def TrainData(trains):
                         pad = (0, 1, 0, 0),
                         child = Departure(station2["departures"][1]),
                     ),
+                ] if station2["departures"] else [
+                    NoScheduledTrains(),
                 ],
             ),
         ],

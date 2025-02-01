@@ -146,7 +146,7 @@ class TrainStationData:
     departures: list[TrainDeparture] = field(default_factory=list)
 
 
-async def get_station_data(routes: set[str], station_id: str) -> TrainStationData:
+async def get_station_data(station_id: str, routes: set[str]) -> TrainStationData:
     """Fetch train arrival timestamps and service alerts for specified routes at a station."""
     feed_urls = {get_feed_url(route) for route in routes}
     station_data = TrainStationData(station_id=station_id)
