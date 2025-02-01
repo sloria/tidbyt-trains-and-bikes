@@ -55,53 +55,6 @@ def main(config):
         ),
     )
 
-def NoScheduledTrains():
-    return render.Marquee(height = 22, scroll_direction = "vertical", child = render.WrappedText(
-        width = 28,
-        content = "No trains on sched",
-        color = COLORS["orange"],
-        font = "tb-8",
-    ))
-
-def TrainData(trains):
-    station1, station2 = trains
-    if len(station1["departures"]) + len(station2["departures"]) == 0:
-        return render.Box(height = 22, child = render.WrappedText(
-            content = "No trains scheduled",
-            color = COLORS["orange"],
-            font = "tb-8",
-        ))
-    return render.Row(
-        expanded = True,
-        main_align = "space_around",
-        children = [
-            # Station 1 departures
-            render.Column(
-                children = [
-                    Departure(station1["departures"][0]),
-                    render.Padding(
-                        pad = (0, 1, 0, 0),
-                        child = Departure(station1["departures"][1]),
-                    ),
-                ] if station1["departures"] else [
-                    NoScheduledTrains(),
-                ],
-            ),
-            # Station 2 departures
-            render.Column(
-                children = [
-                    Departure(station2["departures"][0]),
-                    render.Padding(
-                        pad = (0, 1, 0, 0),
-                        child = Departure(station2["departures"][1]),
-                    ),
-                ] if station2["departures"] else [
-                    NoScheduledTrains(),
-                ],
-            ),
-        ],
-    )
-
 def get_schema():
     response = http.get(API_URL + "/mocks")
     available_mocks = response.json()
@@ -143,6 +96,45 @@ def get_transit_data(config):
         fail("Failed to fetch transit data")
     return response.json()
 
+def TrainData(trains):
+    station1, station2 = trains
+    if len(station1["departures"]) + len(station2["departures"]) == 0:
+        return render.Box(height = 22, child = render.WrappedText(
+            content = "No trains scheduled",
+            color = COLORS["orange"],
+            font = "tb-8",
+        ))
+    return render.Row(
+        expanded = True,
+        main_align = "space_around",
+        children = [
+            # Station 1 departures
+            render.Column(
+                children = [
+                    Departure(station1["departures"][0]),
+                    render.Padding(
+                        pad = (0, 1, 0, 0),
+                        child = Departure(station1["departures"][1]),
+                    ),
+                ] if station1["departures"] else [
+                    NoScheduledTrains(),
+                ],
+            ),
+            # Station 2 departures
+            render.Column(
+                children = [
+                    Departure(station2["departures"][0]),
+                    render.Padding(
+                        pad = (0, 1, 0, 0),
+                        child = Departure(station2["departures"][1]),
+                    ),
+                ] if station2["departures"] else [
+                    NoScheduledTrains(),
+                ],
+            ),
+        ],
+    )
+
 def Departure(departure):
     return render.Row(
         cross_align = "center",
@@ -168,6 +160,14 @@ def Departure(departure):
             ),
         ],
     )
+
+def NoScheduledTrains():
+    return render.Marquee(height = 22, scroll_direction = "vertical", child = render.WrappedText(
+        width = 28,
+        content = "No trains on sched",
+        color = COLORS["orange"],
+        font = "tb-8",
+    ))
 
 def BikeData(bike_data):
     regular_bike_count = int(bike_data["regular"])

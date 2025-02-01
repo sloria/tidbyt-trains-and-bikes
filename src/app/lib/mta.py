@@ -206,10 +206,3 @@ async def get_station_data(station_id: str, routes: set[str]) -> TrainStationDat
 
     station_data.departures.sort(key=lambda lt: lt.time)
     return station_data
-
-
-def format_time(minutes):
-    """Format minutes into display string."""
-    if minutes == 0:
-        return "now"
-    return f"{minutes}m"
