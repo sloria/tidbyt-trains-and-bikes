@@ -40,7 +40,10 @@ COLORS_FOR_ROUTES = {
 ROUTE_COLORS = {route: color for color, routes in COLORS_FOR_ROUTES.items() for route in routes}
 
 def main(config):
-    data = get_transit_data(config)
+    transit_data = get_transit_data(config)
+    weather_data = get_weather_data(config)
+    trains = transit_data["trains"]
+    citibike = transit_data["citibike"]
     return render.Root(
         max_age = 10,
         child = render.Column(
@@ -48,15 +51,15 @@ def main(config):
             children = [
                 render.Padding(
                     pad = (2, 1, 2, 0),
-                    child = TrainData(data["trains"]),
+                    child = TrainData(trains),
                 ),
-                BikeData(data["citibike"]),
+                BikeData(citibike, weather_data = weather_data),
             ],
         ),
     )
 
 def get_schema():
-    response = http.get(API_URL + "/mocks")
+    response = http.get(API_URL + "/transit-mocks")
     available_mocks = response.json()
 
     mock_options = [
@@ -79,9 +82,9 @@ def get_schema():
         fields = [
             schema.Dropdown(
                 id = "mock_name",
-                name = "Mock Data",
-                desc = "Mock data source to use for debugging.",
-                icon = "bug",
+                name = "Transit Mock Data",
+                desc = "Transit mock data source to use for debugging.",
+                icon = "train",
                 default = mock_options[0].value,
                 options = mock_options,
             ),
@@ -94,6 +97,15 @@ def get_transit_data(config):
     response = http.get(API_URL + route)
     if response.status_code != 200:
         fail("Failed to fetch transit data")
+    return response.json()
+
+def get_weather_data(config):
+    mock_name = config.str("weather_mock_name", "").strip()
+    route = "/weather?mock={}".format(mock_name) if mock_name else "/weather"
+    response = http.get(API_URL + route)
+    if response.status_code != 200:
+        # TODO: don't crash, just don't display weather
+        fail("Failed to fetch weather data")
     return response.json()
 
 def TrainData(trains):
@@ -169,16 +181,24 @@ def NoScheduledTrains(routes):
         font = "tb-8",
     )
 
-def BikeData(bike_data):
+def BikeData(bike_data, weather_data):
     regular_bike_count = int(bike_data["regular"])
     ebike_count = int(bike_data["ebike"])
+    temperature = int(weather_data["temperature"])
+
+    # TODO
+    # condition = weather_data["condition"]
+    # weather_icon = ...
+    weather_icon_width = 8  # px
 
     # Number of total characters for the counts
     n_bike_digits = len(str(regular_bike_count)) + len(str(ebike_count))
+    n_temp_digits = len(str(temperature))
 
     # Digits in tb-8 font are monospaced 5x8
-    digits_width = n_bike_digits * 5
-    icon_width = 5
+    digits_width = (n_bike_digits + n_temp_digits) * 5
+    lightning_icon_width = 5  # px
+    icon_width = lightning_icon_width + weather_icon_width + 4  # add 4 digits for degree sign
 
     # Padding to the right of the counts
     counts_right_padding = 2
@@ -194,18 +214,18 @@ def BikeData(bike_data):
     bike_end_x = WIDTH - counts_text_width - offset  # end next to counts
     animated_bike = animation.Transformation(
         child = render.Image(IMAGE_BIKE),
-        duration = 125,
+        duration = 100,
         keyframes = [
             animation.Keyframe(
                 percentage = 0.0,
                 transforms = [animation.Translate(bike_start_x, 0)],
             ),
+            # animation.Keyframe(
+            #     percentage = 0.15,
+            #     transforms = [animation.Translate(15, 0)],
+            # ),
             animation.Keyframe(
-                percentage = 0.15,
-                transforms = [animation.Translate(15, 0)],
-            ),
-            animation.Keyframe(
-                percentage = 0.35,
+                percentage = 0.40,
                 transforms = [animation.Translate(bike_end_x, 0)],
                 curve = "ease_out",
             ),
@@ -219,15 +239,14 @@ def BikeData(bike_data):
     return render.Row(
         expanded = True,
         main_align = "end",
+        cross_align = "center",
         children = [
             # Rectangle along which the bike moves
             render.Box(
-                # color = COLORS["orange"],
                 width = animation_width,
                 child = animated_bike,
             ),
             render.Padding(
-                # Align counts text with the bottom of the bike
                 pad = (0, 1, counts_right_padding, 0),
                 child = render.Row(
                     children = [
@@ -237,12 +256,33 @@ def BikeData(bike_data):
                             color = COLORS["white"] if regular_bike_count > 0 else COLORS["gray"],
                             font = "tb-8",
                         ),
-                        # Icon
+                        # Lightning icon
                         render.Padding(pad = (0, 2, 1, 0), child = render.Image(IMAGE_LIGHTNING)),
                         # E-bike count
                         render.Text(
                             content = str(ebike_count),
                             color = COLORS["white"] if ebike_count > 0 else COLORS["gray"],
+                            font = "tb-8",
+                        ),
+                        # TODO
+                        # Weather icon
+                        # render.Padding(
+                        #     pad = (2, 2, 0, 0),
+                        #     child = render.Image(weather_icon),
+                        # ),
+                        # Vertical line separator
+                        render.Padding(
+                            pad = (0, 0, 1, 0),
+                            child = render.Box(
+                                width = 8,
+                                height = 8,
+                                color = COLORS["dark_gray"],
+                            ),
+                        ),
+                        # Temperature
+                        render.Text(
+                            content = str(temperature) + "°",
+                            color = COLORS["white"],
                             font = "tb-8",
                         ),
                     ],
