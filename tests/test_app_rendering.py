@@ -3,7 +3,7 @@ import pathlib
 import pytest
 from litestar.testing import subprocess_async_client
 
-from app.api.mocks import TransitDataMockName, TransitDataMocks
+from app.api.mocks import TransitDataMockName, TransitDataMocks, WeatherDataMockName
 from app.lib.tidbyt import render_applet_with_replacements
 from app.tasks import TIDBYT_APP_PATH
 from tests.syrupy_extensions import WebPImageSnapshotExtension
@@ -25,8 +25,13 @@ async def render_with_mock_data(monkeypatch):
     returning the webp file as bytes.
     """
 
-    async def _render_with_mock_data(mock_name: TransitDataMockName) -> bytes:
-        monkeypatch.setenv("MOCK", mock_name)
+    async def _render_with_mock_data(
+        mock_name: TransitDataMockName,
+        *,
+        weather_mock_name: WeatherDataMockName = "basic",
+    ) -> bytes:
+        monkeypatch.setenv("TRANSIT_MOCK", mock_name)
+        monkeypatch.setenv("WEATHER_MOCK", weather_mock_name)
         # Run the API server in a subprocess while running the Tidbyt app
         async with subprocess_async_client(
             workdir=PROJECT_ROOT, app="app.api.app:app"

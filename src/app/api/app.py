@@ -9,10 +9,21 @@ import structlog
 from litestar import Litestar, get
 
 from app import settings, tasks
+from app.lib.weather import TemperatureUnit  # noqa: TC001
 
 from .log import structlog_plugin
-from .mocks import TransitDataMockName, TransitDataMocks
-from .models import BikeStationData, TrainStationData, TransitData
+from .mocks import (
+    TransitDataMockName,
+    TransitDataMocks,
+    WeatherDataMockName,
+    WeatherDataMocks,
+)
+from .models import (
+    BikeStationData,
+    TrainStationData,
+    TransitData,
+    WeatherData,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
@@ -29,7 +40,7 @@ async def health() -> dict[str, str]:
 
 @get("/transit", cache=5)
 async def transit(*, mock: TransitDataMockName | None = None) -> TransitData:
-    mock_name = mock or settings.MOCK
+    mock_name = mock or settings.TRANSIT_MOCK
     if mock_name:
         logger.debug("returning mock data")
         return TransitDataMocks[cast(TransitDataMockName, mock_name)]
@@ -46,9 +57,26 @@ async def transit(*, mock: TransitDataMockName | None = None) -> TransitData:
     )
 
 
-@get("/mocks")
-async def list_mocks() -> list[str]:
+@get("/transit-mocks")
+async def list_transit_mocks() -> list[str]:
     return list(TransitDataMocks)
+
+
+@get("/weather")
+async def weather(
+    *,
+    mock: WeatherDataMockName | None = None,
+    temperature_unit: TemperatureUnit = "fahrenheit",
+) -> WeatherData:
+    mock_name = mock or settings.WEATHER_MOCK
+    if mock_name:
+        logger.debug("returning mock weather data")
+        return WeatherDataMocks[cast(WeatherDataMockName, mock_name)]
+    return await WeatherData.from_coordinates(
+        latitude=settings.LATITUDE,
+        longitude=settings.LONGITUDE,
+        temperature_unit=temperature_unit,
+    )
 
 
 ### Periodic tasks ###
@@ -64,7 +92,7 @@ async def schedule_periodic_tasks(app: Litestar) -> AsyncGenerator[None]:
 ### The ASGI App ###
 
 app = Litestar(
-    route_handlers=[health, transit, list_mocks],
+    route_handlers=[health, transit, weather, list_transit_mocks],
     lifespan=[schedule_periodic_tasks],
     plugins=[structlog_plugin],
 )

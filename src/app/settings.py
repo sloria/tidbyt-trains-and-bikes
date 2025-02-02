@@ -24,6 +24,11 @@ MTA_STATION_ROUTES2 = set(os.environ["MTA_STATION_ROUTES2"].split(","))
 
 CITIBIKE_STATION_ID = os.environ["CITIBIKE_STATION_ID"]
 
+### Weather ###
+
+LATITUDE = float(os.environ["LATITUDE"])
+LONGITUDE = float(os.environ["LONGITUDE"])
+
 ### Periodic tasks ###
 
 # Set to 1 to enable render and push to the Tidbyt device at the interval specified below
@@ -34,4 +39,7 @@ TIDBYT_PUSH_INTERVAL = float(os.getenv("TIDBYT_PUSH_INTERVAL", "10"))
 ### API ###
 
 # Mock data source. Used for testing.
-MOCK = os.getenv("MOCK", None)
+TRANSIT_MOCK = os.getenv("TRANSIT_MOCK", None)
+
+# Mock data source. Used for testing.
+WEATHER_MOCK = os.getenv("WEATHER_MOCK", None)

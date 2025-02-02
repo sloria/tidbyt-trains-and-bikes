@@ -13,7 +13,11 @@ from .models import (
     TrainDeparture,
     TrainStationData,
     TransitData,
+    WeatherCondition,
+    WeatherData,
 )
+
+### Mock transit data ###
 
 
 class BikeStationDataFactory(DataclassFactory[BikeStationData]):
@@ -166,4 +170,18 @@ TransitDataMocks: dict[TransitDataMockName, TransitData] = {
             ),
         ],
     ),
+}
+
+### Mock weather data ###
+
+
+class WeatherDataFactory(DataclassFactory[WeatherData]):
+    temperature = 35
+    temperature_unit = "fahrenheit"
+    condition = WeatherCondition.CLEAR
+
+
+WeatherDataMockName = Literal["basic"]
+WeatherDataMocks: dict[WeatherDataMockName, WeatherData] = {
+    "basic": WeatherDataFactory.build(),
 }
