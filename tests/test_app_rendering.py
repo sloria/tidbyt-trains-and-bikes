@@ -3,7 +3,12 @@ import pathlib
 import pytest
 from litestar.testing import subprocess_async_client
 
-from app.api.mocks import TransitDataMockName, TransitDataMocks, WeatherDataMockName
+from app.api.mocks import (
+    TransitDataMockName,
+    TransitDataMocks,
+    WeatherResponseMockName,
+    WeatherResponseMocks,
+)
 from app.lib.tidbyt import render_applet_with_replacements
 from app.tasks import TIDBYT_APP_PATH
 from tests.syrupy_extensions import WebPImageSnapshotExtension
@@ -26,11 +31,11 @@ async def render_with_mock_data(monkeypatch):
     """
 
     async def _render_with_mock_data(
-        mock_name: TransitDataMockName,
         *,
-        weather_mock_name: WeatherDataMockName = "basic",
+        transit_mock_name: TransitDataMockName,
+        weather_mock_name: WeatherResponseMockName = "no_weather",
     ) -> bytes:
-        monkeypatch.setenv("TRANSIT_MOCK", mock_name)
+        monkeypatch.setenv("TRANSIT_MOCK", transit_mock_name)
         monkeypatch.setenv("WEATHER_MOCK", weather_mock_name)
         # Run the API server in a subprocess while running the Tidbyt app
         async with subprocess_async_client(
@@ -54,5 +59,20 @@ async def render_with_mock_data(monkeypatch):
 async def test_rendered_output_matches_snapshots(
     render_with_mock_data, transit_data_mock, snapshot
 ):
-    result = await render_with_mock_data(transit_data_mock)
+    result = await render_with_mock_data(
+        transit_mock_name=transit_data_mock, weather_mock_name="no_weather"
+    )
+    assert result == snapshot
+
+
+@pytest.mark.parametrize(
+    "weather_response_mock",
+    WeatherResponseMocks,
+)
+async def test_rendered_output_with_weather_matches_snapshots(
+    render_with_mock_data, weather_response_mock, snapshot
+):
+    result = await render_with_mock_data(
+        transit_mock_name="basic", weather_mock_name=weather_response_mock
+    )
     assert result == snapshot

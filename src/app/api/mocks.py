@@ -15,6 +15,8 @@ from .models import (
     TransitData,
     WeatherCondition,
     WeatherData,
+    WeatherMeta,
+    WeatherResponse,
 )
 
 ### Mock transit data ###
@@ -176,12 +178,47 @@ TransitDataMocks: dict[TransitDataMockName, TransitData] = {
 
 
 class WeatherDataFactory(DataclassFactory[WeatherData]):
-    temperature = 35
-    temperature_unit = "fahrenheit"
+    temperature_celsius = 12
     condition = WeatherCondition.CLEAR
 
 
-WeatherDataMockName = Literal["basic"]
-WeatherDataMocks: dict[WeatherDataMockName, WeatherData] = {
-    "basic": WeatherDataFactory.build(),
+class WeatherMetaFactory(DataclassFactory[WeatherMeta]):
+    requested_temperature_unit = "F"
+
+
+class WeatherResponseFactory(DataclassFactory[WeatherResponse]):
+    data = WeatherDataFactory.build()
+    meta = WeatherMetaFactory.build()
+
+
+WeatherResponseMockName = Literal[
+    "sunny",
+    "cloudy",
+    "clear_night",
+    "single_digit_temperature",
+    "cold_and_snowy",
+    "no_weather",
+]
+WeatherResponseMocks: dict[WeatherResponseMockName, WeatherResponse] = {
+    "no_weather": WeatherResponseFactory.build(data=None, meta=None),
+    "sunny": WeatherResponseFactory.build(
+        data=WeatherDataFactory.build(condition=WeatherCondition.SUNNY)
+    ),
+    "cloudy": WeatherResponseFactory.build(
+        data=WeatherDataFactory.build(condition=WeatherCondition.CLOUDY)
+    ),
+    "clear_night": WeatherResponseFactory.build(
+        data=WeatherDataFactory.build(condition=WeatherCondition.CLEAR_NIGHT)
+    ),
+    "single_digit_temperature": WeatherResponseFactory.build(
+        data=WeatherDataFactory.build(
+            temperature_celsius=3,
+        ),
+        meta=WeatherMetaFactory.build(requested_temperature_unit="C"),
+    ),
+    "cold_and_snowy": WeatherResponseFactory.build(
+        data=WeatherDataFactory.build(
+            temperature_celsius=-20, condition=WeatherCondition.SNOWY
+        )
+    ),
 }

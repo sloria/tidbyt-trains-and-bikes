@@ -8,7 +8,7 @@ PrecipitationUnit = Literal["mm", "inch"]
 
 
 class CurrentWeatherData(TypedDict, total=False):
-    temperature_2m: float
+    temperature_2m: float  # in Celsius
     apparent_temperature: float
     is_day: bool
     precipitation: float
@@ -20,10 +20,6 @@ class CurrentWeatherData(TypedDict, total=False):
 async def get_current_weather(
     latitude: float,
     longitude: float,
-    *,
-    temperature_unit: TemperatureUnit = "fahrenheit",
-    wind_speed_unit: WindSpeedUnit = "mph",
-    precipitation_unit: PrecipitationUnit = "inch",
 ) -> CurrentWeatherData:
     """Get weather data for a given location."""
     params: dict[str, Any] = {
@@ -38,12 +34,6 @@ async def get_current_weather(
             "wind_speed_10m",
         ],
     }
-    if wind_speed_unit != "kmh":
-        params["wind_speed_unit"] = wind_speed_unit
-    if temperature_unit != "celsius":
-        params["temperature_unit"] = temperature_unit
-    if precipitation_unit != "mm":
-        params["precipitation_unit"] = precipitation_unit
     async with httpx.AsyncClient() as client:
         response = await client.get(
             "https://api.open-meteo.com/v1/forecast", params=params
