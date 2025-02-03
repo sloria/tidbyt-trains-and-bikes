@@ -17,3 +17,10 @@ serve-tidbyt:
 	@timeout 10 bash -c 'until curl -s http://localhost:8000/health >/dev/null 2>&1; do sleep 1; done'
 	@echo "Starting the pixlet server... 🚀"
 	@pixlet serve src/app/tidbyt_app/trains_and_bikes.star
+
+.PHONY: deploy
+deploy:
+	@echo "Deploying the app... 🚀"
+	@git checkout stable
+	@git merge main
+	@git push origin stable
