@@ -1,6 +1,6 @@
 # tidbyt-trains-and-bikes
 
-Tidbyt app to display NYC subway times for multiple stations and Citibike availability _on one screen_.
+Tidbyt app to display NYC subway times for multiple stations, Citibike availability, and weather _on one screen_.
 
 ![Screenshot](./assets/screenshot.gif)
 
@@ -62,7 +62,7 @@ TIDBYT_ENABLE_PUSH=1 make serve
 
 ### Why not use the official apps?
 
-Tidbyt's official NYC Subway app limits you to viewing one station at a time, and Citibike info is in a separate app.
+Tidbyt's official NYC Subway app limits you to viewing one station at a time. Citibike and weather are separate apps.
 Checking all the transit options means waiting for multiple screens. This app consolidates everything I need
 into one screen.
 
