@@ -2,7 +2,9 @@
 
 Tidbyt app to display NYC subway times for multiple stations, Citibike availability, and weather _on one screen_.
 
-![Screenshot](./assets/screenshot.gif)
+<div align="center">
+  <img src="./assets/screenshot.gif" alt="Screenshot">
+</div>
 
 ## Contents
 
