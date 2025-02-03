@@ -196,6 +196,7 @@ WeatherResponseMockName = Literal[
     "cloudy",
     "clear_night",
     "single_digit_temperature",
+    "hot_and_sunny",
     "cold_and_snowy",
     "no_weather",
 ]
@@ -215,6 +216,11 @@ WeatherResponseMocks: dict[WeatherResponseMockName, WeatherResponse] = {
             temperature_celsius=3,
         ),
         meta=WeatherMetaFactory.build(requested_temperature_unit="C"),
+    ),
+    "hot_and_sunny": WeatherResponseFactory.build(
+        data=WeatherDataFactory.build(
+            temperature_celsius=30, condition=WeatherCondition.SUNNY
+        )
     ),
     "cold_and_snowy": WeatherResponseFactory.build(
         data=WeatherDataFactory.build(

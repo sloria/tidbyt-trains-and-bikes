@@ -1,6 +1,7 @@
 load("animation.star", "animation")
 load("encoding/base64.star", "base64")
 load("http.star", "http")
+load("math.star", "math")
 load("render.star", "render")
 load("schema.star", "schema")
 
@@ -81,7 +82,12 @@ COLORS = {
     "dark_gray": "#1C1C1C",
     "gray": "#AFAFAF",
     "orange": "#FFA500",
+    "blue": "#00e1ff",
+    "red": "#ff5252",
 }
+
+COLOR_COLD = COLORS["blue"]
+COLOR_HOT = COLORS["red"]
 
 # Train route colors
 # https://api.mta.info/#/subwayRealTimeFeeds
@@ -283,9 +289,9 @@ def BikesAndWeather(bike_data, weather_data):
     if should_show_weather:
         current_weather = weather_data["data"]
         if weather_data["meta"]["requested_temperature_unit"] == "F":
-            temperature = int(current_weather["temperature_fahrenheit"])
+            temperature = int(math.round(current_weather["temperature_fahrenheit"]))
         else:
-            temperature = int(current_weather["temperature_celsius"])
+            temperature = int(math.round(current_weather["temperature_celsius"]))
 
         weather_condition = current_weather["condition"]
         weather_icon = CONDITION_ICONS.get(weather_condition, None)
@@ -351,6 +357,13 @@ def BikesAndWeather(bike_data, weather_data):
         ),
     ]
     if should_show_weather:
+        temperature_celsius = weather_data["data"]["temperature_celsius"]
+        if temperature_celsius < 0:
+            temperature_color = COLOR_COLD
+        elif temperature_celsius >= 30:
+            temperature_color = COLOR_HOT
+        else:
+            temperature_color = COLORS["white"]
         children.extend(
             [
                 # Weather icon
@@ -361,7 +374,7 @@ def BikesAndWeather(bike_data, weather_data):
                 # Temperature
                 render.Text(
                     content = str(temperature) + "°",
-                    color = COLORS["white"],
+                    color = temperature_color,
                     font = "tb-8",
                 ),
             ],
