@@ -34,13 +34,14 @@ async def render_and_push_to_tidbyt() -> None:
     if image_data != previous_data:
         log.debug("pushing tidbyt app")
         await store.set("image_data", image_data)
-        await push_to_tidbyt(
+        response = await push_to_tidbyt(
             image_data=image_data,
             api_key=settings.TIDBYT_API_KEY,
             device_id=settings.TIDBYT_DEVICE_ID,
             installation_id=settings.TIDBYT_INSTALLATION_ID,
             background=True,
         )
+        log.debug("push response", response=response)
     else:
         log.info("cache hit: no image change, skipping push")
 
