@@ -109,18 +109,20 @@ ROUTE_COLORS = {route: color for color, routes in COLORS_FOR_ROUTES.items() for 
 def main(config):
     transit_data = get_transit_data(config)
     weather_data = get_weather_data(config)
-    trains = transit_data["trains"]
-    citibike = transit_data["citibike"]
+    train_data = transit_data["trains"]
+    bike_data = transit_data["citibike"]
     return render.Root(
         max_age = 10,
         child = render.Column(
             expanded = True,
             children = [
+                # Trains
                 render.Padding(
                     pad = (2, 1, 2, 0),
-                    child = TrainData(trains),
+                    child = TrainData(train_data),
                 ),
-                BikesAndWeather(citibike, weather_data = weather_data),
+                # Bikes and maybe weather
+                BikesAndWeather(bike_data = bike_data, weather_data = weather_data),
             ],
         ),
     )
@@ -273,52 +275,29 @@ def NoScheduledTrains(routes):
     )
 
 def BikesAndWeather(bike_data, weather_data):
-    regular_bike_count = int(bike_data["regular"])
-    ebike_count = int(bike_data["ebike"])
-
-    # Number of total characters for the counts
-    n_bike_digits = len(str(regular_bike_count)) + len(str(ebike_count))
-
-    lightning_icon_width = 5  # px
-
-    temperature = None
-    n_temp_digits = 0
-    icon_width = lightning_icon_width
-    weather_image = None
     should_show_weather = weather_data and weather_data["data"]
+    children = [
+        Bikes(bike_data),
+    ]
     if should_show_weather:
-        current_weather = weather_data["data"]
-        if weather_data["meta"]["requested_temperature_unit"] == "F":
-            temperature = int(math.round(current_weather["temperature_fahrenheit"]))
-        else:
-            temperature = int(math.round(current_weather["temperature_celsius"]))
+        children.append(Weather(weather_data))
+    return render.Row(
+        expanded = True,
+        main_align = "space_between",
+        cross_align = "center",
+        children = children,
+    )
 
-        weather_condition = current_weather["condition"]
-        weather_icon = CONDITION_ICONS.get(weather_condition, None)
-        if weather_icon:
-            weather_image = render.Image(src = weather_icon, width = 8)
-        else:
-            weather_image = render.Box(width = 8, height = 8)
-        weather_icon_width = 10  # 8px + 2 padding
-
-        n_temp_digits = len(str(temperature))
-        icon_width = lightning_icon_width + weather_icon_width + 4  # add 4 digits for degree sign
-
-    # Digits in tb-8 font are monospaced 5x8
-    digits_width = (n_bike_digits + n_temp_digits) * 5
-
-    # Padding to the right of the counts
-    counts_right_padding = 2
-
-    # Total pixels that the counts take up
-    counts_text_width = digits_width + icon_width + counts_right_padding
-
+def Bikes(bike_data, *, width = 32):
     # Bike animation
-    bike_start_x = -10  # start off screen
+    bike_icon_width = 12  # px
+    counts_x_start = 14
+    bike_start_x = -bike_icon_width  # start off screen
 
-    # Increase to increase space between bike and counts
-    offset = 14
-    bike_end_x = WIDTH - counts_text_width - offset  # end next to counts
+    # Space between where bike ends and counts
+    bike_right_spacing = 3
+    bike_end_x = counts_x_start - (bike_icon_width // 2) - bike_right_spacing
+    animation_width = width - counts_x_start
     animated_bike = animation.Transformation(
         child = render.Image(IMAGE_BIKE),
         duration = 80,
@@ -339,62 +318,71 @@ def BikesAndWeather(bike_data, weather_data):
             ),
         ],
     )
-    animation_width = WIDTH - counts_text_width
-    children = [
-        # Regular bike count
-        render.Text(
-            content = str(regular_bike_count),
-            color = COLORS["white"] if regular_bike_count > 0 else COLORS["gray"],
-            font = "tb-8",
-        ),
-        # Lightning icon
-        render.Padding(pad = (0, 2, 1, 0), child = render.Image(IMAGE_LIGHTNING)),
-        # E-bike count
-        render.Text(
-            content = str(ebike_count),
-            color = COLORS["white"] if ebike_count > 0 else COLORS["gray"],
-            font = "tb-8",
-        ),
-    ]
-    if should_show_weather:
-        temperature_celsius = weather_data["data"]["temperature_celsius"]
-        if temperature_celsius < 0:
-            temperature_color = COLOR_COLD
-        elif temperature_celsius >= 30:
-            temperature_color = COLOR_HOT
-        else:
-            temperature_color = COLORS["white"]
-        children.extend(
-            [
-                # Weather icon
-                render.Padding(
-                    pad = (1, 0, 1, 0),
-                    child = weather_image,
-                ),
-                # Temperature
-                render.Text(
-                    content = str(temperature) + "°",
-                    color = temperature_color,
-                    font = "tb-8",
-                ),
-            ],
-        )
+    regular_bike_count = int(bike_data["regular"])
+    ebike_count = int(bike_data["ebike"])
+    bike_counts = render.Row(
+        children = [
+            # Regular bike count
+            render.Text(
+                content = str(regular_bike_count),
+                color = COLORS["white"] if regular_bike_count > 0 else COLORS["gray"],
+                font = "tb-8",
+            ),
+            # Lightning icon
+            render.Padding(pad = (0, 2, 1, 0), child = render.Image(IMAGE_LIGHTNING)),
+            # E-bike count
+            render.Text(
+                content = str(ebike_count),
+                color = COLORS["white"] if ebike_count > 0 else COLORS["gray"],
+                font = "tb-8",
+            ),
+        ],
+    )
     return render.Row(
-        expanded = True,
-        main_align = "end",
-        cross_align = "center",
         children = [
             # Rectangle along which the bike moves
             render.Box(
                 width = animation_width,
                 child = animated_bike,
             ),
-            render.Padding(
-                # Align text with the bottom of the bike
-                pad = (0, 1, counts_right_padding, 0),
-                child = render.Row(
-                    children = children,
-                ),
-            ),
+            # Pad top to align text with bottom of bike
+            render.Padding(pad = (0, 1, 0, 0), child = bike_counts),
         ],
+    )
+
+def Weather(weather_data):
+    current_weather = weather_data["data"]
+    if weather_data["meta"]["requested_temperature_unit"] == "F":
+        temperature = int(math.round(current_weather["temperature_fahrenheit"]))
+    else:
+        temperature = int(math.round(current_weather["temperature_celsius"]))
+
+    weather_condition = current_weather["condition"]
+    weather_icon = CONDITION_ICONS.get(weather_condition, None)
+    if weather_icon:
+        weather_image = render.Image(src = weather_icon, width = 8)
+    else:
+        weather_image = render.Box(width = 8, height = 8)
+    temperature_celsius = weather_data["data"]["temperature_celsius"]
+    if temperature_celsius < 0:
+        temperature_color = COLOR_COLD
+    elif temperature_celsius >= 30:
+        temperature_color = COLOR_HOT
+    else:
+        temperature_color = COLORS["white"]
+    children = [
+        # Weather icon
+        render.Padding(
+            pad = (1, 0, 1, 0),
+            child = weather_image,
+        ),
+        # Temperature
+        render.Text(
+            content = str(temperature) + "°",
+            color = temperature_color,
+            font = "tb-8",
+        ),
+    ]
+    return render.Row(
+        children = children,
     )
