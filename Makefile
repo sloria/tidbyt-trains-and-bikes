@@ -21,6 +21,8 @@ serve-tidbyt:
 .PHONY: deploy
 deploy:
 	@echo "Deploying the app... 🚀"
+	@git checkout main
+	@git pull
 	@git checkout stable
 	@git merge main
 	@git push origin stable
