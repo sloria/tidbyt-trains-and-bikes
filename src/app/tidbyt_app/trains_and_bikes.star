@@ -82,7 +82,7 @@ COLORS = {
     "dark_gray": "#1C1C1C",
     "gray": "#AFAFAF",
     "orange": "#FFA500",
-    "blue": "#00e1ff",
+    "blue": "#b9ecff",
     "red": "#ff5252",
 }
 
