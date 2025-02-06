@@ -60,16 +60,16 @@ class TransitData:
 
 
 class WeatherCondition(StrEnum):
-    SUNNY = auto()
-    MOSTLY_SUNNY = auto()
-    RAINY = auto()
+    CLEAR = auto()
+    CLEAR_NIGHT = auto()
     CLOUDY = auto()
     CLOUDY_NIGHT = auto()
-    CLEAR_NIGHT = auto()
-    SNOWY = auto()
-    THUNDERSTORM = auto()
-    CLEAR = auto()
     FOG = auto()
+    MOSTLY_SUNNY = auto()
+    RAINY = auto()
+    SNOWY = auto()
+    SUNNY = auto()
+    THUNDERSTORM = auto()
 
     @classmethod
     def from_weather_code(cls, weather_code: int, *, is_day: bool) -> WeatherCondition:

@@ -70,6 +70,7 @@ CONDITION_ICONS = {
     "clear_night": WEATHER_ICONS["moony.png"],
     "cloudy": WEATHER_ICONS["cloudy.png"],
     "cloudy_night": WEATHER_ICONS["moony.png"],
+    "fog": WEATHER_ICONS["foggy.png"],
     "mostly_sunny": WEATHER_ICONS["sunnyish.png"],
     "rainy": WEATHER_ICONS["rainy.png"],
     "snowy": WEATHER_ICONS["snowy.png"],
