@@ -21,12 +21,10 @@ PIXLET_PATH = env.str("PIXLET_PATH", "pixlet")
 ### MTA ###
 
 MTA_STATION_ID1 = env.str("MTA_STATION_ID1")
-MTA_STATION_ROUTES1_LIST = env.list("MTA_STATION_ROUTES1", delimiter=",")
-MTA_STATION_ROUTES1 = set(MTA_STATION_ROUTES1_LIST or [])
+MTA_STATION_ROUTES1: set[str] = set(env.list("MTA_STATION_ROUTES1", delimiter=","))
 
 MTA_STATION_ID2 = env.str("MTA_STATION_ID2")
-MTA_STATION_ROUTES2_LIST = env.list("MTA_STATION_ROUTES2", delimiter=",")
-MTA_STATION_ROUTES2 = set(MTA_STATION_ROUTES2_LIST or [])
+MTA_STATION_ROUTES2: set[str] = set(env.list("MTA_STATION_ROUTES2", delimiter=","))
 
 ### Citibike ###
 

@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "apscheduler>=4.0.0a5",
-    "environs>=14.1.0",
+    "environs>=14.1.1",
     # TODO: Use upstream gtfs-realtime-bindings once
     # https://github.com/MobilityData/gtfs-realtime-bindings/pull/141 and
     # https://github.com/MobilityData/gtfs-realtime-bindings/pull/142 are merged and released
