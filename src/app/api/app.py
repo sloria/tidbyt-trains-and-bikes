@@ -44,7 +44,7 @@ async def transit(*, mock: TransitDataMockName | None = None) -> TransitData:
     mock_name = mock or settings.TRANSIT_MOCK
     if mock_name:
         logger.debug("returning mock data")
-        return TransitDataMocks[cast(TransitDataMockName, mock_name)]
+        return TransitDataMocks[cast("TransitDataMockName", mock_name)]
     return TransitData(
         trains=[
             await TrainStationData.from_station_id(
@@ -71,7 +71,7 @@ async def weather(
     mock_name = mock or settings.WEATHER_MOCK
     if mock_name:
         logger.debug("returning mock weather data")
-        return WeatherResponseMocks[cast(WeatherResponseMockName, mock_name)]
+        return WeatherResponseMocks[cast("WeatherResponseMockName", mock_name)]
     if settings.WEATHER_COORDINATES:
         latitude, longitude = settings.WEATHER_COORDINATES
         data = await WeatherData.from_coordinates(

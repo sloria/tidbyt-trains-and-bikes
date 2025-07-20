@@ -42,7 +42,7 @@ WEATHER_COORDINATES = env.list(
 )
 
 TEMPERATURE_UNIT = cast(
-    Literal["C", "F"],
+    "Literal['C', 'F']",
     env.str("TEMPERATURE_UNIT", "F", validate=validate.OneOf(["F", "C"])),
 )
 
