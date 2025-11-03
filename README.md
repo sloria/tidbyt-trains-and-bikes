@@ -68,7 +68,7 @@ Install deps (requires [uv](https://docs.astral.sh/uv/getting-started/installati
 
 ```
 uv sync
-brew install pixlet parallel
+brew install tidbyt/tidbyt/pixlet parallel
 ```
 
 Copy the .env file:
