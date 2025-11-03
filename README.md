@@ -11,6 +11,7 @@ Tidbyt app to display NYC subway times for multiple stations, Citibike availabil
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+- [Running it in Docker](#running-it-in-docker)
 - [Running it locally](#running-it-locally)
   - [Pushing to your Tidbyt](#pushing-to-your-tidbyt)
 - [FAQ](#faq)
@@ -18,6 +19,48 @@ Tidbyt app to display NYC subway times for multiple stations, Citibike availabil
   - [Why not publish this as a community app?](#why-not-publish-this-as-a-community-app)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Running it in Docker
+
+You can use the following Docker compose file to run the app:
+
+```yaml
+services:
+  app:
+    image: ghcr.io/sloria/tidbyt-trains-and-bikes:latest
+    environment:
+      CITIBIKE_STATION_ID: "${CITIBIKE_STATION_ID}"
+      MTA_STATION_ID1: "${MTA_STATION_ID1}"
+      MTA_STATION_ID2: "${MTA_STATION_ID2}"
+      MTA_STATION_ROUTES1: "${MTA_STATION_ROUTES1}"
+      MTA_STATION_ROUTES2: "${MTA_STATION_ROUTES2}"
+      TIDBYT_API_KEY: "${TIDBYT_API_KEY}"
+      TIDBYT_DEVICE_ID: "${TIDBYT_DEVICE_ID}"
+      TIDBYT_ENABLE_PUSH: "${TIDBYT_ENABLE_PUSH}"
+      TIDBYT_INSTALLATION_ID: "${TIDBYT_INSTALLATION_ID}"
+      WEATHER_COORDINATES: "${WEATHER_COORDINATES}"
+      TEMPERATURE_UNIT: "${TEMPERATURE_UNIT:-F}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+```
+
+Download the annotated `.env` file.
+
+```
+curl -o .env https://raw.githubusercontent.com/sloria/tidbyt-trains-and-bikes/main/.env.local.example
+```
+
+Update `.env` with your values.
+
+Then run it.
+
+```
+docker-compose up -d
+```
 
 ## Running it locally
 
