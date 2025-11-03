@@ -1,8 +1,7 @@
 [project]
 name = "app"
 description = "Tidbyt app to display NYC subway times and Citibike availability"
-version = "0.1.0"
-readme = "README.md"
+version = "25.0.0"
 requires-python = ">=3.13"
 dependencies = [
     "apscheduler>=4.0.0a6",

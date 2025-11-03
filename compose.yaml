@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    environment:
+      CITIBIKE_STATION_ID: "${CITIBIKE_STATION_ID}"
+      MTA_STATION_ID1: "${MTA_STATION_ID1}"
+      MTA_STATION_ID2: "${MTA_STATION_ID2}"
+      MTA_STATION_ROUTES1: "${MTA_STATION_ROUTES1}"
+      MTA_STATION_ROUTES2: "${MTA_STATION_ROUTES2}"
+      TIDBYT_API_KEY: "${TIDBYT_API_KEY}"
+      TIDBYT_DEVICE_ID: "${TIDBYT_DEVICE_ID}"
+      TIDBYT_ENABLE_PUSH: "${TIDBYT_ENABLE_PUSH}"
+      TIDBYT_INSTALLATION_ID: "${TIDBYT_INSTALLATION_ID}"
+      WEATHER_COORDINATES: "${WEATHER_COORDINATES}"
+      TEMPERATURE_UNIT: "${TEMPERATURE_UNIT:-F}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
