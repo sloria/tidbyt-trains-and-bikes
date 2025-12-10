@@ -59,7 +59,7 @@ Update `.env` with your values.
 Then run it.
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Running it locally
