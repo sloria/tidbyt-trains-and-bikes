@@ -4,9 +4,9 @@ import asyncio
 import base64
 import re
 import tempfile
-from pathlib import Path
 from typing import Literal, overload
 
+import anyio
 import httpx
 
 
@@ -137,7 +137,7 @@ async def render_applet_with_replacements(
     environment variables.
     """
     # Replace given variables in the file
-    content = Path(path).read_text()
+    content = await anyio.Path(path).read_text()
     modified_content = content
     for key, value in replacements.items():
         pattern = rf'{key}\s*=\s*["\'].*?["\']'
