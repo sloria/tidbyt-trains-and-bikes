@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, cast
 import structlog
 from litestar import Litestar, get
 
-from app import settings, tasks
+from app import sentry, settings, tasks
 
 from .log import structlog_plugin
 from .mocks import (
@@ -100,6 +100,10 @@ async def schedule_periodic_tasks(app: Litestar) -> AsyncGenerator[None]:
         await scheduler.start_in_background()
         yield
 
+
+### Sentry ###
+
+sentry.init_sentry()
 
 ### The ASGI App ###
 

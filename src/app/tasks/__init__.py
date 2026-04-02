@@ -4,6 +4,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import httpx
 import structlog
 from apscheduler import AsyncScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -19,6 +20,17 @@ TIDBYT_APP_PATH = HERE / ".." / "tidbyt_app" / "trains_and_bikes.star"
 
 # store = RedisStore.with_client(url=settings.REDIS_URL)
 store = MemoryStore()
+
+
+async def maybe_send_heartbeat() -> None:
+    """POST to the heartbeat URL to signal the periodic task is alive."""
+    if not settings.HEARTBEAT_URL:
+        return
+    async with httpx.AsyncClient() as client:
+        try:
+            await client.post(settings.HEARTBEAT_URL)
+        except httpx.HTTPError:
+            logger.warning("failed to send heartbeat", url=settings.HEARTBEAT_URL)
 
 
 async def render_and_push_to_tidbyt() -> None:
@@ -44,6 +56,7 @@ async def render_and_push_to_tidbyt() -> None:
         log.debug("push response", response=response)
     else:
         log.info("cache hit: no image change, skipping push")
+    await maybe_send_heartbeat()
 
 
 @asynccontextmanager

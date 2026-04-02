@@ -63,4 +63,13 @@ WEATHER_MOCK = env.str(
     "WEATHER_MOCK", None, validate=validate.OneOf(WeatherResponseMocks)
 )
 
+### Sentry / GlitchTip ###
+
+# Sentry DSN for error reporting. Leave unset to disable.
+SENTRY_DSN = env.str("SENTRY_DSN", None, validate=validate.URL())
+# Environment name sent to Sentry (e.g. "production", "staging")
+SENTRY_ENV = env.str("SENTRY_ENV", None)
+# URL to POST to for uptime heartbeat (GlitchTip). Leave unset to disable.
+HEARTBEAT_URL = env.str("HEARTBEAT_URL", None, validate=validate.URL())
+
 env.seal()
