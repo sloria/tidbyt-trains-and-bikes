@@ -16,6 +16,9 @@ services:
       TIDBYT_INSTALLATION_ID: "${TIDBYT_INSTALLATION_ID}"
       WEATHER_COORDINATES: "${WEATHER_COORDINATES}"
       TEMPERATURE_UNIT: "${TEMPERATURE_UNIT:-F}"
+      SENTRY_DSN: "${SENTRY_DSN:-}"
+      SENTRY_ENV: "${SENTRY_ENV:-}"
+      HEARTBEAT_URL: "${HEARTBEAT_URL:-}"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
