@@ -4,9 +4,10 @@ import datetime as dt
 from dataclasses import dataclass, field
 from enum import IntEnum
 
-import httpx
 import structlog
 from google.transit import gtfs_realtime_pb2
+
+from .http import make_client
 
 logger = structlog.get_logger()
 
@@ -151,7 +152,7 @@ async def get_station_data(station_id: str, routes: set[str]) -> TrainStationDat
     feed_urls = {get_feed_url(route) for route in routes}
     station_data = TrainStationData(station_id=station_id)
 
-    async with httpx.AsyncClient() as client:
+    async with make_client() as client:
         # Fetch service alerts
         alerts_response = await client.get(MTA_SUBWAY_ALERTS_URL)
         if alerts_response.is_success:

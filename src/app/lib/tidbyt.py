@@ -7,7 +7,8 @@ import tempfile
 from typing import Literal, overload
 
 import anyio
-import httpx
+
+from .http import make_client
 
 
 class TidbytError(Exception):
@@ -39,7 +40,7 @@ async def push_to_tidbyt(
         "Content-Type": "application/json",
     }
 
-    async with httpx.AsyncClient() as client:
+    async with make_client() as client:
         response = await client.post(
             f"https://api.tidbyt.com/v0/devices/{device_id}/push",
             headers=headers,

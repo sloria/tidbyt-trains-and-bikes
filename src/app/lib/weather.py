@@ -1,6 +1,6 @@
 from typing import Any, Literal, TypedDict
 
-import httpx
+from .http import make_client
 
 WindSpeedUnit = Literal["kmh", "mph"]
 TemperatureUnit = Literal["celsius", "fahrenheit"]
@@ -34,7 +34,7 @@ async def get_current_weather(
             "wind_speed_10m",
         ],
     }
-    async with httpx.AsyncClient() as client:
+    async with make_client() as client:
         response = await client.get(
             "https://api.open-meteo.com/v1/forecast", params=params
         )
