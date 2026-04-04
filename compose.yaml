@@ -2,8 +2,6 @@ services:
   app:
     build:
       context: .
-    ports:
-      - "8000:8000"
     environment:
       CITIBIKE_STATION_ID: "${CITIBIKE_STATION_ID}"
       MTA_STATION_ID1: "${MTA_STATION_ID1}"
