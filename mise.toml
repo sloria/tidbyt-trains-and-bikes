@@ -1,0 +1,24 @@
+[tools]
+uv = "latest"
+prek = "latest"
+
+
+[tasks.serve]
+description = "Run both the API and the Tidbyt app in parallel"
+run = [{ tasks = ["serve-api", "serve-tidbyt"] }]
+
+[tasks.serve-api]
+description = "Start the API server with hot reload"
+run = "uv run litestar run --reload --port 8000 --debug"
+
+[tasks.serve-tidbyt]
+description = "Start the pixlet server (needs API running)"
+run = "pixlet serve src/app/tidbyt_app/trains_and_bikes.star"
+
+[tasks.release]
+description = "Bump version, commit, tag, and push"
+run = "scripts/release.sh {{arg(name='version')}}"
+
+[tasks.lint]
+description = "Run linters"
+run = "prek run --all-files"

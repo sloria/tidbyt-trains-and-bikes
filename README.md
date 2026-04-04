@@ -64,11 +64,16 @@ docker compose up -d
 
 ## Running it locally
 
-Install deps (requires [uv](https://docs.astral.sh/uv/getting-started/installation/)):
+Install mise and pixlet.
+
+```
+brew install mise tidbyt/tidbyt/pixlet
+```
+
+Install python dependencies
 
 ```
 uv sync
-brew install tidbyt/tidbyt/pixlet parallel
 ```
 
 Copy the .env file:
@@ -79,10 +84,10 @@ cp .env.local.example .env
 
 Modify `.env` with proper values. Variables with the `CHANGEME` placeholder are required.
 
-Run both the API server and the Tidbyt server simultaneously (requires GNU parallel, installed above):
+Run both the API server and the TidByt server simultaneously:
 
 ```
-make serve
+mise serve
 ```
 
 Open http://localhost:8080/ to view the TidByt preview app.
