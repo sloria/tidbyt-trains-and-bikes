@@ -5,8 +5,10 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, cast
 
+import httpx
 import structlog
-from litestar import Litestar, get
+from litestar import Litestar, Request, get
+from litestar.stores.memory import MemoryStore
 
 from app import sentry, settings, tasks
 
@@ -30,6 +32,8 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
 logger = structlog.get_logger()
+
+WEATHER_CACHE_KEY = "last_weather_data"
 
 ### Route handlers ###
 
@@ -65,6 +69,7 @@ async def list_transit_mocks() -> list[str]:
 
 @get("/weather")
 async def weather(
+    request: Request,
     *,
     mock: WeatherResponseMockName | None = None,
 ) -> WeatherResponse:
@@ -74,10 +79,20 @@ async def weather(
         return WeatherResponseMocks[cast("WeatherResponseMockName", mock_name)]
     if settings.WEATHER_COORDINATES:
         latitude, longitude = settings.WEATHER_COORDINATES
-        data = await WeatherData.from_coordinates(
-            latitude=latitude,
-            longitude=longitude,
-        )
+        store = request.app.stores.get("weather")
+        # OpenMeteo has intermittent connection errors that resolve quickly.
+        # Handle those gracefully and return last cached data
+        try:
+            data = await WeatherData.from_coordinates(
+                latitude=latitude,
+                longitude=longitude,
+            )
+            # XXX: MemoryStore stores values as-is in memory despite the
+            # str | bytes type annotation on the Store base class
+            await store.set(WEATHER_CACHE_KEY, data)  # type: ignore[arg-type]
+        except httpx.ConnectError:
+            logger.warning("connection error to OpenMeteo, using cached data")
+            data = await store.get(WEATHER_CACHE_KEY)  # type: ignore[assignment]
     else:
         data = None
     return WeatherResponse(
@@ -111,4 +126,5 @@ app = Litestar(
     route_handlers=[health, transit, list_transit_mocks, weather, list_weather_mocks],
     lifespan=[schedule_periodic_tasks],
     plugins=[structlog_plugin],
+    stores={"weather": MemoryStore()},
 )
