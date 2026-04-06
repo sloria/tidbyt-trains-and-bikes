@@ -10,6 +10,7 @@ Tidbyt app to display NYC subway times for multiple stations, Citibike availabil
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Running it in Docker](#running-it-in-docker)
 - [Running it locally](#running-it-locally)
