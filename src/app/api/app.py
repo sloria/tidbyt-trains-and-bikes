@@ -67,7 +67,7 @@ async def list_transit_mocks() -> list[str]:
     return list(TransitDataMocks)
 
 
-@get("/weather")
+@get("/weather", cache=300)
 async def weather(
     request: Request,
     *,
@@ -80,8 +80,8 @@ async def weather(
     if settings.WEATHER_COORDINATES:
         latitude, longitude = settings.WEATHER_COORDINATES
         store = request.app.stores.get("weather")
-        # OpenMeteo has intermittent connection errors that resolve quickly.
-        # Handle those gracefully and return last cached data
+        # OpenMeteo has intermittent errors (connection, timeout, rate limit)
+        # that resolve quickly. Handle those gracefully and return last cached data.
         try:
             data = await WeatherData.from_coordinates(
                 latitude=latitude,
@@ -90,8 +90,8 @@ async def weather(
             # XXX: MemoryStore stores values as-is in memory despite the
             # str | bytes type annotation on the Store base class
             await store.set(WEATHER_CACHE_KEY, data)  # type: ignore[arg-type]
-        except httpx.ConnectError:
-            logger.warning("connection error to OpenMeteo, using cached data")
+        except httpx.HTTPError:
+            logger.warning("error fetching from OpenMeteo, using cached data")
             data = await store.get(WEATHER_CACHE_KEY)  # type: ignore[assignment]
     else:
         data = None
