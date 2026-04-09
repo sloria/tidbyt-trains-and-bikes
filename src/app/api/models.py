@@ -83,7 +83,7 @@ class WeatherCondition(StrEnum):
                 return WeatherCondition.CLOUDY
         else:
             if weather_code == 0:
-                return WeatherCondition.CLEAR
+                return WeatherCondition.CLEAR_NIGHT
             if 1 <= weather_code <= 3:
                 return WeatherCondition.CLOUDY_NIGHT
         if weather_code in {45, 48}:  # Fog and depositing rime fog
