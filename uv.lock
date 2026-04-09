@@ -16,7 +16,7 @@ wheels = [
 
 [[package]]
 name = "app"
-version = "26.0.3"
+version = "26.0.4"
 source = { editable = "." }
 dependencies = [
     { name = "apscheduler" },
