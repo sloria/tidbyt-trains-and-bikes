@@ -1,5 +1,5 @@
 ##### Python base #####
-FROM python:3.13.9-slim-trixie@sha256:326df678c20c78d465db501563f3492d17c42a4afe33a1f2bf5406a1d56b0e86 AS python-base
+FROM python:3.14.4-slim-trixie@sha256:538a18f1db92b4210a0b71aca2d14c156a96dedbe8867465c8ff4dce04d2ec39 AS python-base
 
 RUN apt-get update \
   && apt-get upgrade -y \
