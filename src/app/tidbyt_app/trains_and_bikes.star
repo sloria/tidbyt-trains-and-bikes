@@ -214,32 +214,22 @@ def TrainData(trains):
         expanded = True,
         main_align = "space_around",
         children = [
-            # Station 1 departures
-            render.Column(
-                children = [
-                    Departure(station1["departures"][0]),
-                    render.Padding(
-                        pad = (0, 1, 0, 0),
-                        child = Departure(station1["departures"][1]),
-                    ),
-                ] if station1["departures"] else [
-                    NoScheduledTrains(station1["routes"]),
-                ],
-            ),
-            # Station 2 departures
-            render.Column(
-                children = [
-                    Departure(station2["departures"][0]),
-                    render.Padding(
-                        pad = (0, 1, 0, 0),
-                        child = Departure(station2["departures"][1]),
-                    ),
-                ] if station2["departures"] else [
-                    NoScheduledTrains(station2["routes"]),
-                ],
-            ),
+            render.Column(children = StationDepartures(station1)),
+            render.Column(children = StationDepartures(station2)),
         ],
     )
+
+def StationDepartures(station):
+    deps = station["departures"]
+    if not deps:
+        return [NoScheduledTrains(station["routes"])]
+    children = [Departure(deps[0])]
+    if len(deps) > 1:
+        children.append(render.Padding(
+            pad = (0, 1, 0, 0),
+            child = Departure(deps[1]),
+        ))
+    return children
 
 def Departure(departure):
     return render.Row(
