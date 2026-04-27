@@ -21,6 +21,9 @@ dependencies = [
 requires = ["flit_core<4"]
 build-backend = "flit_core.buildapi"
 
+[tool.uv]
+exclude-newer = "1 week"
+
 [dependency-groups]
 dev = [
   "mypy>=1.14.1",
