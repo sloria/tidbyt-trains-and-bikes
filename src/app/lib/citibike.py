@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import httpx
 import structlog
 
 from .http import make_client
@@ -16,9 +17,15 @@ class CitibikeStationData:
 async def get_bike_counts(station_id: str) -> CitibikeStationData | None:
     """Fetch bike counts for a given station."""
     async with make_client() as client:
-        response = await client.get(
-            "https://gbfs.citibikenyc.com/gbfs/en/station_status.json"
-        )
+        try:
+            response = await client.get(
+                "https://gbfs.citibikenyc.com/gbfs/en/station_status.json"
+            )
+        except httpx.HTTPError as exc:
+            logger.warning(
+                "failed to fetch citibike data for station %s: %s", station_id, exc
+            )
+            return None
         if not response.is_success:
             logger.debug(
                 "failed to fetch citibike data for station %s (status_code=%s)",

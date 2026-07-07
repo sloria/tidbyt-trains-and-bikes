@@ -4,6 +4,7 @@ import datetime as dt
 from dataclasses import dataclass, field
 from enum import IntEnum
 
+import httpx
 import structlog
 from google.transit import gtfs_realtime_pb2
 
@@ -147,63 +148,74 @@ class TrainStationData:
     departures: list[TrainDeparture] = field(default_factory=list)
 
 
-async def get_station_data(station_id: str, routes: set[str]) -> TrainStationData:
-    """Fetch train arrival timestamps and service alerts for specified routes at a station."""
+async def get_station_data(
+    station_id: str, routes: set[str]
+) -> TrainStationData | None:
+    """Fetch train arrival timestamps and service alerts for specified routes at a station.
+
+    Returns None if the upstream feeds cannot be fetched.
+    """
     feed_urls = {get_feed_url(route) for route in routes}
     station_data = TrainStationData(station_id=station_id)
 
-    async with make_client() as client:
-        # Fetch service alerts
-        alerts_response = await client.get(MTA_SUBWAY_ALERTS_URL)
-        if alerts_response.is_success:
-            alerts_feed = gtfs_realtime_pb2.FeedMessage()
-            alerts_feed.ParseFromString(alerts_response.content)
+    try:
+        async with make_client() as client:
+            # Fetch service alerts
+            alerts_response = await client.get(MTA_SUBWAY_ALERTS_URL)
+            if alerts_response.is_success:
+                alerts_feed = gtfs_realtime_pb2.FeedMessage()
+                alerts_feed.ParseFromString(alerts_response.content)
 
-            for entity in alerts_feed.entity:
-                if entity.HasField("alert"):
-                    for informed_entity in entity.alert.informed_entity:
-                        if informed_entity.route_id in routes:
-                            alert = ServiceAlert(
-                                route=informed_entity.route_id,
-                                # Get alert text in English
-                                alert_text=entity.alert.header_text.translation[0].text,
-                                # Return cause and effect as strings rather than ints
-                                cause=AlertCause(entity.alert.cause).name,
-                                effect=AlertEffect(entity.alert.effect).name,
-                            )
-                            station_data.alerts.append(alert)
-        routes_with_delays = {
-            alert.route for alert in station_data.alerts if alert.is_delay
-        }
-        # Fetch train times
-        for feed_url in feed_urls:
-            response = await client.get(feed_url)
-            if not response.is_success:
-                logger.warning(
-                    "failed to fetch feed %s (status_code=%s). skipping...",
-                    feed_url,
-                    response.status_code,
-                )
-                continue
-
-            feed = gtfs_realtime_pb2.FeedMessage()
-            feed.ParseFromString(response.content)
-
-            station_data.departures.extend(
-                [
-                    TrainDeparture(
-                        route=entity.trip_update.trip.route_id,
-                        time=_get_departure_time(stop_time_update),
-                        has_delays=entity.trip_update.trip.route_id
-                        in routes_with_delays,
+                for entity in alerts_feed.entity:
+                    if entity.HasField("alert"):
+                        for informed_entity in entity.alert.informed_entity:
+                            if informed_entity.route_id in routes:
+                                alert = ServiceAlert(
+                                    route=informed_entity.route_id,
+                                    # Get alert text in English
+                                    alert_text=entity.alert.header_text.translation[
+                                        0
+                                    ].text,
+                                    # Return cause and effect as strings rather than ints
+                                    cause=AlertCause(entity.alert.cause).name,
+                                    effect=AlertEffect(entity.alert.effect).name,
+                                )
+                                station_data.alerts.append(alert)
+            routes_with_delays = {
+                alert.route for alert in station_data.alerts if alert.is_delay
+            }
+            # Fetch train times
+            for feed_url in feed_urls:
+                response = await client.get(feed_url)
+                if not response.is_success:
+                    logger.warning(
+                        "failed to fetch feed %s (status_code=%s). skipping...",
+                        feed_url,
+                        response.status_code,
                     )
-                    for entity in feed.entity
-                    if entity.HasField("trip_update")
-                    and entity.trip_update.trip.route_id in routes
-                    for stop_time_update in entity.trip_update.stop_time_update
-                    if stop_time_update.stop_id == station_id
-                ]
-            )
+                    continue
+
+                feed = gtfs_realtime_pb2.FeedMessage()
+                feed.ParseFromString(response.content)
+
+                station_data.departures.extend(
+                    [
+                        TrainDeparture(
+                            route=entity.trip_update.trip.route_id,
+                            time=_get_departure_time(stop_time_update),
+                            has_delays=entity.trip_update.trip.route_id
+                            in routes_with_delays,
+                        )
+                        for entity in feed.entity
+                        if entity.HasField("trip_update")
+                        and entity.trip_update.trip.route_id in routes
+                        for stop_time_update in entity.trip_update.stop_time_update
+                        if stop_time_update.stop_id == station_id
+                    ]
+                )
+    except httpx.HTTPError as exc:
+        logger.warning("failed to fetch station data for %s: %s", station_id, exc)
+        return None
 
     station_data.departures.sort(key=lambda lt: lt.time)
     return station_data

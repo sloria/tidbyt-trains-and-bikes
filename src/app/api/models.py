@@ -24,6 +24,8 @@ class TrainStationData:
         Fetches data from the MTA GTFS feed.
         """
         station_data = await get_station_data(station_id, routes=routes)
+        if station_data is None:
+            return cls(station_id=station_id, routes=sorted(routes))
         return cls(
             station_id=station_id,
             routes=sorted(routes),
