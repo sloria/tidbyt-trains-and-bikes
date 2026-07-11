@@ -7,7 +7,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-06-30T13:57:49.386048321Z"
+exclude-newer = "2026-07-04T22:11:55.271909563Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -50,7 +50,7 @@ dev = [
 requires-dist = [
     { name = "apscheduler", specifier = ">=4.0.0a6" },
     { name = "environs", specifier = ">=14.2.0" },
-    { name = "gtfs-realtime-bindings", git = "https://github.com/sloria/gtfs-realtime-bindings.git?subdirectory=python&rev=sloria" },
+    { name = "gtfs-realtime-bindings", specifier = ">=2.1.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "litestar", extras = ["standard", "structlog"], specifier = ">=2.16.0" },
     { name = "polyfactory", specifier = ">=2.22.1" },
@@ -224,10 +224,14 @@ wheels = [
 
 [[package]]
 name = "gtfs-realtime-bindings"
-version = "1.0.0"
-source = { git = "https://github.com/sloria/gtfs-realtime-bindings.git?subdirectory=python&rev=sloria#88390950c446338e204d72f434a553995b78fbde" }
+version = "2.1.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "protobuf" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9c/a2/0f37ed620fc1aa6edb4b6efcb29af2c3c3754d5d3d91e5adc7bdbcb84df0/gtfs_realtime_bindings-2.1.0.tar.gz", hash = "sha256:1507ca39628ee8df2d3aae38f9eed881d4a82aa8246930d608ba6428d5ca3a56", size = 11916, upload-time = "2026-07-02T18:28:12.46Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3f/f3/180b6e0e3cb43cf43a43ec18a6122a37c936d95fe0fea30eae1b3a1a6ee2/gtfs_realtime_bindings-2.1.0-py3-none-any.whl", hash = "sha256:02d00999c429691430b3d21ef619e1697e543926a4ca1dc0521204bad6a723ed", size = 11180, upload-time = "2026-07-02T18:28:11.159Z" },
 ]
 
 [[package]]
