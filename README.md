@@ -41,12 +41,6 @@ services:
       TIDBYT_INSTALLATION_ID: "${TIDBYT_INSTALLATION_ID}"
       WEATHER_COORDINATES: "${WEATHER_COORDINATES}"
       TEMPERATURE_UNIT: "${TEMPERATURE_UNIT:-F}"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 ```
 
 Download the annotated `.env` file.
@@ -65,10 +59,10 @@ docker compose up -d
 
 ## Running it locally
 
-Install mise and pixlet.
+Install mise.
 
 ```
-brew install mise tidbyt/tidbyt/pixlet
+brew install mise
 ```
 
 Install python dependencies
@@ -85,13 +79,13 @@ cp .env.local.example .env
 
 Modify `.env` with proper values. Variables with the `CHANGEME` placeholder are required.
 
-Run both the API server and the TidByt server simultaneously:
+Run the preview server:
 
 ```
 mise serve
 ```
 
-Open http://localhost:8080/ to view the TidByt preview app.
+Open http://localhost:8080/ to view the preview. Set `TRANSIT_MOCK` and `WEATHER_MOCK` to use fake data (see `src/app/mocks.py`).
 
 ### Pushing to your Tidbyt
 
@@ -103,10 +97,10 @@ TIDBYT_API_KEY=CHANGEME
 TIDBYT_DEVICE_ID=CHANGME
 ```
 
-Then run the server with `TIDBYT_ENABLE_PUSH=1`:
+Then run the render loop with `TIDBYT_ENABLE_PUSH=1`:
 
 ```
-TIDBYT_ENABLE_PUSH=1 make serve
+TIDBYT_ENABLE_PUSH=1 uv run trains-and-bikes
 ```
 
 ## FAQ
@@ -119,6 +113,4 @@ into one screen.
 
 ### Why not publish this as a community app?
 
-Short answer: This code was written specifically for my apartment. I’m not particularly interested in supporting community usage.
-
-Slightly longer answer: Tidbyt's Starlark SDK has limitations when it comes to querying complex APIs like the MTA's GTFS feed. This requires the use of a proxy server, which means the app is no longer purely Starlark-based. I have no desire to expose the proxy server to the internet or have others depend on it for their devices.
+This app is written in Python with [indiepixel](https://github.com/tmcw/indiepixel), so it can't run on Tidbyt's servers.

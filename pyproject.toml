@@ -1,18 +1,20 @@
 [project]
 name = "app"
 description = "Tidbyt app to display NYC subway times and Citibike availability"
-version = "26.0.7"
+version = "26.1.0"
 requires-python = ">=3.13"
 dependencies = [
-  "apscheduler>=4.0.0a6",
   "environs>=14.2.0",
   "gtfs-realtime-bindings>=2.1.0",
   "httpx>=0.28.1",
-  "litestar[standard,structlog]>=2.16.0",
+  "indiepixel==0.9.0",
   "polyfactory>=2.22.1",
-  "sentry-sdk[litestar]>=2.29.0",
+  "sentry-sdk>=2.29.0",
   "structlog>=25.4.0",
 ]
+
+[project.scripts]
+trains-and-bikes = "app.loop:main"
 
 [build-system]
 requires = ["flit_core<5"]
@@ -26,6 +28,7 @@ dev = [
   "mypy>=1.14.1",
   "pre-commit>=4.1.0",
   "pytest>=8.3.4",
+  "respx>=0.23.1",
   "ruff>=0.9.3",
   "syrupy>=4.8.1",
 ]

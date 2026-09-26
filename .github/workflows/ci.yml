@@ -23,17 +23,6 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install pixlet
-        run: |
-          mkdir -p /tmp/pixlet-install
-          cd /tmp/pixlet-install
-          curl -LO https://github.com/tidbyt/pixlet/releases/download/v0.34.0/pixlet_0.34.0_linux_amd64.tar.gz
-          tar -xvf pixlet_0.34.0_linux_amd64.tar.gz
-          chmod +x pixlet
-          mv pixlet /usr/local/bin/
-          cd -
-          rm -rf /tmp/pixlet-install
-
       - name: Load cached pre-commit dependencies
         id: cached-pre-commit-dependencies
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -70,17 +59,6 @@ jobs:
 
       - name: Install dependencies
         run: uv sync
-
-      - name: Install pixlet
-        run: |
-          mkdir -p /tmp/pixlet-install
-          cd /tmp/pixlet-install
-          curl -LO https://github.com/tidbyt/pixlet/releases/download/v0.34.0/pixlet_0.34.0_linux_amd64.tar.gz
-          tar -xvf pixlet_0.34.0_linux_amd64.tar.gz
-          chmod +x pixlet
-          mv pixlet /usr/local/bin/
-          cd -
-          rm -rf /tmp/pixlet-install
 
       - name: Copy test .env file
         run: cp tests/.env.test .env
