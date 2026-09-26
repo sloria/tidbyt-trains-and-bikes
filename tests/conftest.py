@@ -1,12 +1,8 @@
-from collections.abc import AsyncIterator
 from pathlib import Path
 
 import pytest
-from litestar import Litestar
-from litestar.testing import AsyncTestClient
 
 from app import settings
-from app.api.app import app
 
 HERE = Path(__file__).parent.resolve()
 
@@ -21,9 +17,3 @@ def anyio_backend() -> str:
 def _patch_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "TIDBYT_API_KEY", "fake")
     monkeypatch.setattr(settings, "TIDBYT_DEVICE_ID", "fake")
-
-
-@pytest.fixture
-async def client() -> AsyncIterator[AsyncTestClient[Litestar]]:
-    async with AsyncTestClient(app) as client:
-        yield client

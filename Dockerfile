@@ -33,7 +33,6 @@ ENV UV_LINK_MODE=copy \
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    git \
     build-essential \
     gcc \
   && apt-get autoremove -y \
@@ -46,7 +45,7 @@ RUN apt-get update \
 # Install application
 
 WORKDIR /workspace/app
-COPY pyproject.toml uv.lock application.py ./
+COPY pyproject.toml uv.lock ./
 COPY src/ ./src/
 
 RUN uv venv \
@@ -69,26 +68,7 @@ ENV PATH="/workspace/app/.venv/bin:/usr/local/bin:$PATH" \
   PYTHONFAULTHANDLER=1 \
   PYTHONHASHSEED=random \
   LANG=C.UTF-8 \
-  LC_ALL=C.UTF-8 \
-  LITESTAR_APP="app.api.app:app"
-
-# Need curl for pixlet installation
-# Need git for installing my fork of gtfs-realtime-bindings
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends curl git \
-  && apt-get autoremove -y \
-  && apt-get clean -y \
-  && rm -rf /root/.cache \
-  && rm -rf /var/apt/lists/* \
-  && rm -rf /var/cache/apt/* \
-  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
-
-# Install pixlet
-RUN curl -LO https://github.com/tidbyt/pixlet/releases/download/v0.34.0/pixlet_0.34.0_linux_amd64.tar.gz && \
-  tar -xvf pixlet_0.34.0_linux_amd64.tar.gz && \
-  chmod +x pixlet && \
-  mv pixlet /usr/local/bin && \
-  rm pixlet_0.34.0_linux_amd64.tar.gz
+  LC_ALL=C.UTF-8
 
 # Create non-root user
 RUN addgroup --system --gid 65532 nonroot \
@@ -106,6 +86,5 @@ RUN uv pip install --quiet --disable-pip-version-check /tmp/*.whl \
 
 # Run the application
 USER nonroot
-EXPOSE 8000
 ENTRYPOINT ["tini", "--"]
-CMD ["litestar", "run", "--port", "8000", "--host", "0.0.0.0"]
+CMD ["trains-and-bikes"]
