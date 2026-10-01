@@ -1,7 +1,7 @@
 [project]
 name = "app"
 description = "Tidbyt app to display NYC subway times and Citibike availability"
-version = "26.1.3"
+version = "26.1.4"
 requires-python = ">=3.13"
 dependencies = [
   "environs>=14.2.0",
