@@ -24,7 +24,7 @@ wheels = [
 
 [[package]]
 name = "app"
-version = "26.1.4"
+version = "26.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "environs" },
