@@ -184,6 +184,7 @@ WeatherDataMockName = Literal[
     "sunny",
     "cloudy",
     "rainy",
+    "stormy",
     "clear_night",
     "single_digit_temperature",
     "hot_and_sunny",
@@ -195,6 +196,7 @@ WeatherDataMocks: dict[WeatherDataMockName, WeatherData | None] = {
     "sunny": WeatherDataFactory.build(condition=WeatherCondition.SUNNY),
     "cloudy": WeatherDataFactory.build(condition=WeatherCondition.CLOUDY),
     "rainy": WeatherDataFactory.build(condition=WeatherCondition.RAINY),
+    "stormy": WeatherDataFactory.build(condition=WeatherCondition.THUNDERSTORM),
     "clear_night": WeatherDataFactory.build(condition=WeatherCondition.CLEAR_NIGHT),
     "single_digit_temperature": WeatherDataFactory.build(temperature_celsius=3),
     "hot_and_sunny": WeatherDataFactory.build(
